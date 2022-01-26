@@ -53,9 +53,10 @@ BUILD_COVERITY_SCAN=0
 DISABLE_HARDWARE_DEPENDENCY="False"
 CMAKE_BUILD_TYPE="RelWithDebInfo"
 CMAKE_CMD="$CMAKE"
+MAKE_CMD=make
 BUILD_ECLIPSE=0
 NR="False"
-OPTIONAL_LIBRARIES="telnetsrv enbscope uescope nrscope ldpc_cuda ldpc_t1"
+OPTIONAL_LIBRARIES="telnetsrv enbscope uescope nrscope nrqtscope ldpc_cuda ldpc_t1"
 ulfiusdep=$(basename ./`find /usr/lib* -name libulfius.so`)
 jssondep=$(basename ./`find /usr/lib* -name libjansson.so`)
 if [ "$ulfiusdep" == "libulfius.so" -a "$jssondep" == "libjansson.so" ] ; then
@@ -381,13 +382,23 @@ function main() {
             CMAKE_CMD="$CMAKE_CMD"' -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE -G"Eclipse CDT4 - Unix Makefiles"'
             echo_info "Enabling build eclipse project support"
             shift 1;;
-       --build-lib) 
-            BUILD_OPTLIB="" 
+       --build-lib)
+            BUILD_OPTLIB=""
             if [  "$2" == "all" ] ; then
-              BUILD_OPTLIB="$OPTIONAL_LIBRARIES"
-              echo_info "Enabling build of all optional shared libraries ($OPTIONAL_LIBRARIES)" 
+              NOKLIB=""
+              qt5chartdep=$(find /usr/include -name qchart.h)
+              if [ "$qt5chartdep" == "" ]; then
+                echo_warning "  nrqtscope optional build not included in build-lib option as dependencies requirements not met"
+                NOKLIB="$NOKLIB nrqtscope"
+              fi
+              for alib in $OPTIONAL_LIBRARIES ; do
+                if [[ ! "$NOKLIB" =~ "$alib" ]] ; then
+                  BUILD_OPTLIB="$BUILD_OPTLIB $alib"
+                fi
+              done
+              echo_info "Enabling build of all optional shared libraries ($BUILD_OPTLIB)"
             else
-              for alib in $2 ; do 
+              for alib in $2 ; do
                 for oklib in $OPTIONAL_LIBRARIES ; do
                   if [ "$alib" = "$oklib" ] ; then
                     BUILD_OPTLIB="$BUILD_OPTLIB $alib" 
