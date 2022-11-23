@@ -36,6 +36,7 @@
 #include <openair2/UTIL/OPT/opt.h>
 #include "LAYER2/NR_MAC_COMMON/nr_mac_extern.h"
 #include "LAYER2/nr_rlc/nr_rlc_oai_api.h"
+#include "common/utils/LATSEQ/latseq.h"
 
 //#define SRS_IND_DEBUG
 
@@ -138,6 +139,7 @@ int nr_process_mac_pdu(instance_t module_idP,
     uint8_t rx_lcid = ((NR_MAC_SUBHEADER_FIXED *)pduP)->LCID;
 
     LOG_D(NR_MAC, "In %s: received UL-SCH sub-PDU with LCID 0x%x in %d.%d (remaining PDU length %d)\n", __func__, rx_lcid, frameP, slot, pdu_len);
+    LATSEQ_P("U mac.toDemux--", "len%d::frame%d.slot%d.carriercompid%d.lcid%d.bufaddress%u.pdulen%d.harqpid%d", mac_len, frameP, slot, CC_id, rx_lcid, pduP+mac_subheader_len, pdu_len, harq_pid);
 
     unsigned char *ce_ptr;
     int n_Lcg = 0;
@@ -404,6 +406,7 @@ int nr_process_mac_pdu(instance_t module_idP,
               mac_len);
         UE->mac_stats.ul.lc_bytes[rx_lcid] += mac_len;
 
+        LATSEQ_P("U mac.demuxed--rlc.decoded", "len%d::frame%d.slot%d.carriercompid%d.lcid%d.bufaddress%u", mac_len, frameP, slot, CC_id, rx_lcid, pduP+mac_subheader_len);
         mac_rlc_data_ind(module_idP,
                          UE->rnti,
                          module_idP,

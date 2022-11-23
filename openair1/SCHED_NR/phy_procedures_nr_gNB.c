@@ -44,6 +44,7 @@
 #include <time.h>
 
 #include "intertask_interface.h"
+#include "common/utils/LATSEQ/latseq.h"
 
 //#define DEBUG_RXDATA
 //#define SRS_IND_DEBUG
@@ -824,7 +825,9 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx) {
 
           VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_NR_RX_PUSCH,1);
 	        start_meas(&gNB->rx_pusch_stats);
+          LATSEQ_P("U phy.demodulatestart--phy.demodulateend","::frame%d.slot%d.ulschid%d.harqpid%d.harqround%d", frame_rx, slot_rx, ULSCH_id, harq_pid, ulsch_harq->round);
           nr_rx_pusch(gNB, ULSCH_id, frame_rx, slot_rx, harq_pid);
+          LATSEQ_P("U phy.demodulateend--mac.decoded","::frame%d.slot%d.ulschid%d.harqpid%d.harqround%d", frame_rx, slot_rx, ULSCH_id, harq_pid, ulsch_harq->round);
           gNB->pusch_vars[ULSCH_id]->ulsch_power_tot=0;
           gNB->pusch_vars[ULSCH_id]->ulsch_noise_power_tot=0;
           for (int aarx=0;aarx<gNB->frame_parms.nb_antennas_rx;aarx++) {
@@ -863,6 +866,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx) {
           //LOG_M("rxdataF_ext.m","rxF_ext",gNB->pusch_vars[0]->rxdataF_ext[0],6900,1,1);
           VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_NR_ULSCH_PROCEDURES_RX,1);
           nr_ulsch_procedures(gNB, frame_rx, slot_rx, ULSCH_id, harq_pid);
+          LATSEQ_P("U mac.fullydecoded--mac.demuxed","::frame%d.slot%d.ulschid%d.harqpid%d.harqround%d", frame_rx, slot_rx, ULSCH_id, harq_pid, ulsch_harq->round);
           VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_NR_ULSCH_PROCEDURES_RX,0);
           break;
         }
