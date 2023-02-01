@@ -3694,7 +3694,7 @@ void nr_ue_process_mac_pdu(nr_downlink_indication_t *dl_info,
                                 1,
                                 NULL);
                 } else {
-                  LOG_E(MAC, "[UE %d] Frame %d : unknown LCID %d (gNB %d)\n", module_idP, frameP, rx_lcid, gNB_index);
+                  LOG_E(MAC, "[UE %d] Frame %d.%d : unknown LCID %d (gNB %d)\n", module_idP, frameP, slot, rx_lcid, gNB_index);
                 }
 
 
