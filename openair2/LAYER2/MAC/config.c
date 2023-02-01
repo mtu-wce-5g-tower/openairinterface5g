@@ -141,19 +141,18 @@ uint32_t to_earfcn(int eutra_bandP, uint32_t dl_CarrierFreq, uint32_t bw) {
   for (i = 0; i < BANDTABLE_SIZE && eutra_bandtable[i].band != eutra_bandP; i++);
 
   AssertFatal(i < BANDTABLE_SIZE, "i %d >= BANDTABLE_SIZE %ld\n", i, BANDTABLE_SIZE);
-  if(eutra_bandP != 64){
-    AssertFatal(dl_CarrierFreq_by_100k >= eutra_bandtable[i].dl_min,
-                "Band %d, bw %u : DL carrier frequency %u Hz < %u\n",
-                eutra_bandP, bw, dl_CarrierFreq,
-                eutra_bandtable[i].dl_min);
-    AssertFatal(dl_CarrierFreq_by_100k <=
-                (eutra_bandtable[i].dl_max - bw_by_100),
-                "Band %d, bw %u: DL carrier frequency %u Hz > %d\n",
-                eutra_bandP, bw, dl_CarrierFreq,
-                eutra_bandtable[i].dl_max - bw_by_100);
-    return (dl_CarrierFreq_by_100k - eutra_bandtable[i].dl_min +
-            (eutra_bandtable[i].N_OFFs_DL / 10));
-  }
+  AssertFatal(eutra_bandP != 64, "LTE b64 is a reserved band");
+  AssertFatal(dl_CarrierFreq_by_100k >= eutra_bandtable[i].dl_min,
+              "Band %d, bw %u : DL carrier frequency %u Hz < %u\n",
+              eutra_bandP, bw, dl_CarrierFreq,
+              eutra_bandtable[i].dl_min);
+  AssertFatal(dl_CarrierFreq_by_100k <=
+              (eutra_bandtable[i].dl_max - bw_by_100),
+              "Band %d, bw %u: DL carrier frequency %u Hz > %d\n",
+              eutra_bandP, bw, dl_CarrierFreq,
+              eutra_bandtable[i].dl_max - bw_by_100);
+  return (dl_CarrierFreq_by_100k - eutra_bandtable[i].dl_min +
+          (eutra_bandtable[i].N_OFFs_DL / 10));
 }
 
 uint32_t to_earfcn_DL(int eutra_bandP, long long int dl_CarrierFreq, uint32_t bw) {
@@ -165,19 +164,18 @@ uint32_t to_earfcn_DL(int eutra_bandP, long long int dl_CarrierFreq, uint32_t bw
   for (i = 0; i < BANDTABLE_SIZE && eutra_bandtable[i].band != eutra_bandP; i++);
 
   AssertFatal(i < BANDTABLE_SIZE, "i = %d , it will trigger out-of-bounds read.\n",i);
-  if(eutra_bandP != 64){
-    AssertFatal(dl_CarrierFreq_by_100k >= eutra_bandtable[i].dl_min,
-                "Band %d, bw %u : DL carrier frequency %lld Hz < %u\n",
-                eutra_bandP, bw, dl_CarrierFreq,
-                eutra_bandtable[i].dl_min);
-    AssertFatal(dl_CarrierFreq_by_100k <=
-                (eutra_bandtable[i].dl_max - bw_by_100),
-                "Band %d, bw %u : DL carrier frequency %lld Hz > %d\n",
-                eutra_bandP, bw, dl_CarrierFreq,
-                eutra_bandtable[i].dl_max - bw_by_100);
-    return (dl_CarrierFreq_by_100k - eutra_bandtable[i].dl_min +
-            (eutra_bandtable[i].N_OFFs_DL / 10));
-  }
+  AssertFatal(eutra_bandP != 64, "LTE b64 is a reserved band");
+  AssertFatal(dl_CarrierFreq_by_100k >= eutra_bandtable[i].dl_min,
+              "Band %d, bw %u : DL carrier frequency %lld Hz < %u\n",
+              eutra_bandP, bw, dl_CarrierFreq,
+              eutra_bandtable[i].dl_min);
+  AssertFatal(dl_CarrierFreq_by_100k <=
+              (eutra_bandtable[i].dl_max - bw_by_100),
+              "Band %d, bw %u : DL carrier frequency %lld Hz > %d\n",
+              eutra_bandP, bw, dl_CarrierFreq,
+              eutra_bandtable[i].dl_max - bw_by_100);
+  return (dl_CarrierFreq_by_100k - eutra_bandtable[i].dl_min +
+          (eutra_bandtable[i].N_OFFs_DL / 10));
 }
 
 uint32_t to_earfcn_UL(int eutra_bandP, long long int ul_CarrierFreq, uint32_t bw) {
@@ -189,19 +187,18 @@ uint32_t to_earfcn_UL(int eutra_bandP, long long int ul_CarrierFreq, uint32_t bw
   for (i = 0; i < BANDTABLE_SIZE && eutra_bandtable[i].band != eutra_bandP; i++);
 
   AssertFatal(i < BANDTABLE_SIZE, "i = %d , it will trigger out-of-bounds read.\n",i);
-  if(eutra_bandP != 64){
-    AssertFatal(ul_CarrierFreq_by_100k >= eutra_bandtable[i].ul_min,
-                "Band %d, bw %u : UL carrier frequency %lld Hz < %u\n",
-                eutra_bandP, bw, ul_CarrierFreq,
-                eutra_bandtable[i].ul_min);
-    AssertFatal(ul_CarrierFreq_by_100k <=
-                (eutra_bandtable[i].ul_max - bw_by_100),
-                "Band %d, bw %u : UL carrier frequency %lld Hz > %d\n",
-                eutra_bandP, bw, ul_CarrierFreq,
-                eutra_bandtable[i].ul_max - bw_by_100);
-    return (ul_CarrierFreq_by_100k - eutra_bandtable[i].ul_min +
-            ((eutra_bandtable[i].N_OFFs_DL + 180000) / 10));
-  }
+  AssertFatal(eutra_bandP != 64, "LTE b64 is a reserved band");
+  AssertFatal(ul_CarrierFreq_by_100k >= eutra_bandtable[i].ul_min,
+              "Band %d, bw %u : UL carrier frequency %lld Hz < %u\n",
+              eutra_bandP, bw, ul_CarrierFreq,
+              eutra_bandtable[i].ul_min);
+  AssertFatal(ul_CarrierFreq_by_100k <=
+              (eutra_bandtable[i].ul_max - bw_by_100),
+              "Band %d, bw %u : UL carrier frequency %lld Hz > %d\n",
+              eutra_bandP, bw, ul_CarrierFreq,
+              eutra_bandtable[i].ul_max - bw_by_100);
+  return (ul_CarrierFreq_by_100k - eutra_bandtable[i].ul_min +
+          ((eutra_bandtable[i].N_OFFs_DL + 180000) / 10));
 }
 
 uint32_t from_earfcn(int eutra_bandP, uint32_t dl_earfcn) {
@@ -211,6 +208,7 @@ uint32_t from_earfcn(int eutra_bandP, uint32_t dl_earfcn) {
   for (i = 0; i < BANDTABLE_SIZE && eutra_bandtable[i].band != eutra_bandP; i++);
 
   AssertFatal(i < BANDTABLE_SIZE, "i %d >= BANDTABLE_SIZE %ld\n", i, BANDTABLE_SIZE);
+  AssertFatal(eutra_bandP != 64, "LTE b64 is a reserved band");
   return (eutra_bandtable[i].dl_min +
           (dl_earfcn - (eutra_bandtable[i].N_OFFs_DL / 10))) * 100000;
 }
