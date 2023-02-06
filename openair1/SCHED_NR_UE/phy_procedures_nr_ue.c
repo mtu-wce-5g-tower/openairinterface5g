@@ -727,6 +727,15 @@ int nr_ue_pdsch_procedures(PHY_VARS_NR_UE *ue,
   return 0;
 }
 
+static void send_slot_ind(notifiedFIFO_t *nf, int slot) {
+  if (nf) {
+    notifiedFIFO_elt_t *newElt = newNotifiedFIFO_elt(sizeof(int), 0, NULL, NULL);
+    int *msgData = (int *) NotifiedFifoData(newElt);
+    *msgData = slot;
+    pushNotifiedFIFO(nf, newElt);
+  }
+}
+
 bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
                             UE_nr_rxtx_proc_t *proc,
                             NR_UE_DLSCH_t dlsch[2],
@@ -770,8 +779,11 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
   LOG_D(PHY,"AbsSubframe %d.%d Start LDPC Decoder for CW1 [harq_pid %d] ? %d \n", frame_rx%1024, nr_slot_rx, harq_pid, is_cw1_active);
 
   // exit dlsch procedures as there are no active dlsch
-  if (is_cw0_active != ACTIVE && is_cw1_active != ACTIVE)
+  if (is_cw0_active != ACTIVE && is_cw1_active != ACTIVE) {
+    // don't wait anymore
+    send_slot_ind(ue->tx_resume_ind_fifo[(proc->nr_slot_rx + dlsch[0].dlsch_config.k1_feedback) % ue->frame_parms.slots_per_frame], proc->nr_slot_rx);
     return false;
+  }
 
   // start ldpc decode for CW 0
   dl_harq0->G = nr_get_G(dlsch[0].dlsch_config.number_rbs,
@@ -887,6 +899,8 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
   if (ue->if_inst && ue->if_inst->dl_indication) {
     ue->if_inst->dl_indication(&dl_indication, ul_time_alignment);
   }
+  // DLSCH decoding finished! don't wait anymore
+  send_slot_ind(ue->tx_resume_ind_fifo[(proc->nr_slot_rx + dlsch[0].dlsch_config.k1_feedback) % ue->frame_parms.slots_per_frame], proc->nr_slot_rx);
 
   if (ue->mac_enabled == 1) { // TODO: move this from PHY to MAC layer!
 
@@ -1029,7 +1043,6 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
   }
   return dec;
 }
-
 
 int phy_procedures_nrUE_RX(PHY_VARS_NR_UE *ue,
                            UE_nr_rxtx_proc_t *proc,
@@ -1245,6 +1258,9 @@ int phy_procedures_nrUE_RX(PHY_VARS_NR_UE *ue,
   int ret_pdsch = 0;
   if (dlsch[0].active) {
 
+    // send indication to tx thread to wait for DLSCH decoding
+    send_slot_ind(ue->tx_wait_ind_fifo[(proc->nr_slot_rx + dlsch[0].dlsch_config.k1_feedback) % ue->frame_parms.slots_per_frame], proc->nr_slot_rx);
+
     uint8_t nb_re_dmrs;
     if (dlsch[0].dlsch_config.dmrsConfigType == NFAPI_NR_DMRS_TYPE1) {
       nb_re_dmrs = 6*dlsch[0].dlsch_config.n_dmrs_cdm_groups;
@@ -1284,6 +1300,9 @@ int phy_procedures_nrUE_RX(PHY_VARS_NR_UE *ue,
 
     if (ret_pdsch >= 0)
       nr_ue_dlsch_procedures(ue, proc, dlsch, llr);
+    else
+      // don't wait anymore
+      send_slot_ind(ue->tx_resume_ind_fifo[(proc->nr_slot_rx + dlsch[0].dlsch_config.k1_feedback) % ue->frame_parms.slots_per_frame], proc->nr_slot_rx);
 
     stop_meas(&ue->dlsch_procedures_stat);
     if (cpumeas(CPUMEAS_GETSTATE)) {

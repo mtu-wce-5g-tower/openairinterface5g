@@ -480,6 +480,7 @@ typedef struct {
   uint8_t nscid;
   uint16_t dlDmrsScramblingId;
   uint16_t pduBitmap;
+  uint32_t k1_feedback;
 } fapi_nr_dl_config_dlsch_pdu_rel15_t;
 
 typedef struct {

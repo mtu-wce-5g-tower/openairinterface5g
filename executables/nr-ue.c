@@ -564,6 +564,21 @@ void processSlotTX(void *arg) {
   LOG_D(PHY,"%d.%d => slot type %d\n", proc->frame_tx, proc->nr_slot_tx, proc->tx_slot_type);
   if (proc->tx_slot_type == NR_UPLINK_SLOT || proc->tx_slot_type == NR_MIXED_SLOT){
 
+    // find how many slots to wait for
+    int num_wait_slots = 0;
+    while(true) {
+      notifiedFIFO_elt_t *res = pollNotifiedFIFO(UE->tx_wait_ind_fifo[proc->nr_slot_tx]);
+      if (res == NULL) break;
+      num_wait_slots++;
+      delNotifiedFIFO_elt(res);
+    }
+
+    // then wait for rx slots to send indication
+    for(int i=0; i < num_wait_slots; i++) {
+      notifiedFIFO_elt_t *res = pullNotifiedFIFO(UE->tx_resume_ind_fifo[proc->nr_slot_tx]);
+      delNotifiedFIFO_elt(res);
+    }
+
     // trigger L2 to run ue_scheduler thru IF module
     // [TODO] mapping right after NR initial sync
     if(UE->if_inst != NULL && UE->if_inst->ul_indication != NULL) {
@@ -757,6 +772,14 @@ void *UE_thread(void *arg) {
   int absolute_slot=0, decoded_frame_rx=INT_MAX, trashed_frames=0;
   initNotifiedFIFO(&UE->phy_config_ind);
 
+  int num_ind_fifo = nb_slot_frame;
+  for(int i=0; i < num_ind_fifo; i++) {
+    UE->tx_wait_ind_fifo[i] = malloc(sizeof(*UE->tx_wait_ind_fifo[i]));
+    UE->tx_resume_ind_fifo[i] = malloc(sizeof(*UE->tx_resume_ind_fifo[i]));
+    initNotifiedFIFO(UE->tx_wait_ind_fifo[i]);
+    initNotifiedFIFO(UE->tx_resume_ind_fifo[i]);
+  }
+
   while (!oai_exit) {
     if (UE->lost_sync) {
       UE->is_synchronized = 0;
@@ -919,7 +942,7 @@ void *UE_thread(void *arg) {
     if (curMsg.proc.decoded_frame_rx != -1)
       decoded_frame_rx=(((mac->mib->systemFrameNumber.buf[0] >> mac->mib->systemFrameNumber.bits_unused)<<4) | curMsg.proc.decoded_frame_rx);
     else
-       decoded_frame_rx=-1;
+      decoded_frame_rx=-1;
 
     if (decoded_frame_rx>0 && decoded_frame_rx != curMsg.proc.frame_rx)
       LOG_E(PHY,"Decoded frame index (%d) is not compatible with current context (%d), UE should go back to synch mode\n",

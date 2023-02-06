@@ -1038,6 +1038,8 @@ int8_t nr_ue_process_dci(module_id_t module_id, int cc_id, uint8_t gNB_index, fr
 	  dlsch_config_pdu_1_0->accumulated_delta_PUCCH,
 	  dci->pucch_resource_indicator,
 	  1+dci->pdsch_to_harq_feedback_timing_indicator.val);
+
+    dlsch_config_pdu_1_0->k1_feedback = 1+dci->pdsch_to_harq_feedback_timing_indicator.val;
 	    
     LOG_D(MAC,"(nr_ue_procedures.c) pdu_type=%d\n\n",dl_config->dl_config_list[dl_config->number_pdus].pdu_type);
             
@@ -1348,6 +1350,10 @@ int8_t nr_ue_process_dci(module_id_t module_id, int cc_id, uint8_t gNB_index, fr
     LOG_D(MAC,"(nr_ue_procedures.c) pdu_type=%d\n\n",dl_config->dl_config_list[dl_config->number_pdus].pdu_type);
             
     dl_config->number_pdus = dl_config->number_pdus + 1;
+
+    // send the ack/nack slot number to phy to indicate tx thread to wait for DLSCH decoding
+    dlsch_config_pdu_1_1->k1_feedback = feedback_ti;
+
     /* TODO same calculation for MCS table as done in UL */
     dlsch_config_pdu_1_1->mcs_table = (pdsch_Config->mcs_Table) ? (*pdsch_Config->mcs_Table + 1) : 0;
     dlsch_config_pdu_1_1->qamModOrder = nr_get_Qm_dl(dlsch_config_pdu_1_1->mcs, dlsch_config_pdu_1_1->mcs_table);
@@ -1468,14 +1474,12 @@ void set_harq_status(NR_UE_MAC_INST_t *mac,
   // FIXME k0 != 0 currently not taken into consideration
   current_harq->dl_frame = frame;
   current_harq->dl_slot = slot;
-  if (get_softmodem_params()->emulate_l1) {
-    int scs = get_softmodem_params()->numerology;
-    int slots_per_frame = nr_slots_per_frame[scs];
-    slot += data_toul_fb;
-    if (slot >= slots_per_frame) {
-      frame = (frame + 1) % 1024;
-      slot %= slots_per_frame;
-    }
+  int scs = get_softmodem_params()->numerology;
+  int slots_per_frame = nr_slots_per_frame[scs];
+  slot += data_toul_fb;
+  if (slot >= slots_per_frame) {
+    frame = (frame + 1) % 1024;
+    slot %= slots_per_frame;
   }
 
   LOG_D(NR_PHY,"Setting harq_status for harq_id %d, dl %d.%d, sched ul %d.%d\n",
