@@ -973,16 +973,32 @@ uint8_t do_SIB1(rrc_eNB_carrier_data_t *carrier,
     (*sib1)->freqBandIndicator = 64;
     
     sib1_890->lateNonCriticalExtension = calloc(1, sizeof(OCTET_STRING_t));
-
     OCTET_STRING_t *octate = (*sib1_890).lateNonCriticalExtension;
-    octate->buf = calloc(1, 2);
-    octate->size = 2;
-    // The byte 0x60 refers to enable the freqBandIndicator-v9e0 field
-    octate->buf[0] = 0x60;
-    // Variable used to determine which band will shown freqBandIndicator-v9e0
-    int i = configuration->eutra_band[CC_id] - 65;
-    // This fied refers to the band value shown in freqBandIndicator-v9e0 field, where each band is sepated by 8 bytes starting in b64 (0x00)
-    octate->buf[1] = 8*i; 
+    octate->buf =  calloc(1, sizeof(LTE_SystemInformationBlockType1_v8h0_IEs_t));
+    
+    LTE_SystemInformationBlockType1_v8h0_IEs_t *sib1_8h0;
+    sib1_8h0 = calloc(1, sizeof(LTE_SystemInformationBlockType1_v8h0_IEs_t));
+    sib1_8h0->multiBandInfoList = NULL;
+    sib1_8h0->nonCriticalExtension = calloc(1, sizeof(LTE_SystemInformationBlockType1_v9e0_IEs_t)); 
+
+    long eutra_band = configuration->eutra_band[CC_id];
+    LTE_SystemInformationBlockType1_v9e0_IEs_t *sib1_9e0 = sib1_8h0->nonCriticalExtension;
+    sib1_9e0->freqBandIndicator_v9e0 = &eutra_band;
+    sib1_9e0->multiBandInfoList_v9e0 = NULL;
+    sib1_9e0->nonCriticalExtension = NULL;
+
+    char buffer_sib8h0[1024];
+    enc_rval = uper_encode_to_buffer(&asn_DEF_LTE_SystemInformationBlockType1_v8h0_IEs,
+                              NULL,
+                              (void *)sib1_8h0,
+                              buffer_sib8h0,
+                              1024);
+
+    OCTET_STRING_fromBuf(octate,
+                       (const char *)buffer_sib8h0,
+                       (enc_rval.encoded + 7) / 8);     
+
+    octate->size = (enc_rval.encoded + 7) / 8; 
   }
 
   sib1_890->nonCriticalExtension = calloc(1, sizeof(LTE_SystemInformationBlockType1_v920_IEs_t));
