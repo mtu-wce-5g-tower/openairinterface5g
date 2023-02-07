@@ -1921,7 +1921,7 @@ void nr_rx_pusch(PHY_VARS_gNB *gNB,
                                     rel15_ul);
       }
 
-      nr_gnb_measurements(gNB, ulsch_id, harq_pid, symbol,rel15_ul->nrOfLayers);
+      nr_gnb_measurements(gNB, ulsch_id, harq_pid, symbol, rel15_ul->nrOfLayers);
 
       for (aarx = 0; aarx < frame_parms->nb_antennas_rx; aarx++) {
         if (symbol == rel15_ul->start_symbol_index) {
