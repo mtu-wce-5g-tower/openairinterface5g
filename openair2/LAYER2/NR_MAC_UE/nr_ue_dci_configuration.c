@@ -188,7 +188,7 @@ void config_dci_pdu(NR_UE_MAC_INST_t *mac, fapi_nr_dl_config_dci_dl_pdu_rel15_t 
 
     rel15->dci_length_options[i] = nr_dci_size(initialDownlinkBWP,initialUplinkBWP,
                                                current_DL_BWP, current_UL_BWP,
-                                               mac->cg, &mac->def_dci_pdu_rel15[dci_format],
+                                               mac->cg, &mac->def_dci_pdu_rel15[dl_config->slot][dci_format],
                                                dci_format, NR_RNTI_TC, coreset_id, dl_bwp_id, 
                                                ss->searchSpaceType->present, mac->type0_PDCCH_CSS_config.num_rbs, alt_size);
 
