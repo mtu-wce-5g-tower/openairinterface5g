@@ -1176,9 +1176,9 @@ int phy_procedures_nrUE_RX(PHY_VARS_NR_UE *ue,
     char *p = output;
     const char *end = output + harq_output_len;
     p += snprintf(p, end - p, "Harq round stats for Downlink: %d", ue->dl_stats[0]);
-    for (int round = 1; round < 16 && (round < 3 || ue->dl_stats[round] != 0); ++round)
+    for (int round = 1; round < 4; ++round)
       p += snprintf(p, end - p,"/%d", ue->dl_stats[round]);
-    LOG_I(NR_PHY,"%s/0\n", output);
+    LOG_I(NR_PHY,"%s\n", output);
 
     LOG_I(NR_PHY,"============================================\n");
   }
