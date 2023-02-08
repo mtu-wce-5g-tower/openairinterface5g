@@ -119,7 +119,8 @@ void nr_fill_rx_indication(fapi_nr_rx_indication_t *rx_ind,
                            NR_UE_DLSCH_t *dlsch1,
                            uint16_t n_pdus,
                            UE_nr_rxtx_proc_t *proc,
-                           void *typeSpecific){
+                           void *typeSpecific,
+                           uint8_t *b){
 
   NR_DL_FRAME_PARMS *frame_parms = &ue->frame_parms;
 
@@ -132,7 +133,7 @@ void nr_fill_rx_indication(fapi_nr_rx_indication_t *rx_ind,
   if ((pdu_type !=  FAPI_NR_RX_PDU_TYPE_SSB) && dlsch0) {
     dl_harq0 = &ue->dl_harq_processes[0][dlsch0->dlsch_config.harq_process_nbr];
     trace_NRpdu(DIRECTION_DOWNLINK,
-		dl_harq0->b,
+		b,
 		dlsch0->dlsch_config.TBS / 8,
 		WS_C_RNTI,
 		dlsch0->rnti,
@@ -148,7 +149,7 @@ void nr_fill_rx_indication(fapi_nr_rx_indication_t *rx_ind,
         dl_harq0 = &ue->dl_harq_processes[0][dlsch0->dlsch_config.harq_process_nbr];
         rx_ind->rx_indication_body[n_pdus - 1].pdsch_pdu.harq_pid = dlsch0->dlsch_config.harq_process_nbr;
         rx_ind->rx_indication_body[n_pdus - 1].pdsch_pdu.ack_nack = dl_harq0->ack;
-        rx_ind->rx_indication_body[n_pdus - 1].pdsch_pdu.pdu = dl_harq0->b;
+        rx_ind->rx_indication_body[n_pdus - 1].pdsch_pdu.pdu = b;
         rx_ind->rx_indication_body[n_pdus - 1].pdsch_pdu.pdu_length = dlsch0->dlsch_config.TBS / 8;
       }
       if(dlsch1) {
@@ -805,6 +806,16 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
 
   start_meas(&ue->dlsch_decoding_stats);
 
+  // create memory to store decoder output
+  int a_segments = MAX_NUM_NR_DLSCH_SEGMENTS_PER_LAYER*NR_MAX_NB_LAYERS;  //number of segments to be allocated
+  int num_rb = dlsch[0].dlsch_config.number_rbs;
+  if (num_rb != 273) {
+    a_segments = a_segments*num_rb;
+    a_segments = (a_segments/273)+1;
+  }
+  uint32_t dlsch_bytes = a_segments*1056;  // allocated bytes per segment
+  __attribute__ ((aligned(32))) uint8_t p_b[dlsch_bytes];
+
   ret = nr_dlsch_decoding(ue,
                           proc,
                           gNB_id,
@@ -815,7 +826,9 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
                           frame_rx,
                           nb_symb_sch,
                           nr_slot_rx,
-                          harq_pid);
+                          harq_pid,
+                          dlsch_bytes,
+                          p_b);
 
   LOG_T(PHY,"dlsch decoding, ret = %d\n", ret);
 
@@ -843,7 +856,7 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
   }
 
   nr_fill_dl_indication(&dl_indication, NULL, rx_ind, proc, ue, NULL);
-  nr_fill_rx_indication(rx_ind, ind_type, ue, &dlsch[0], NULL, number_pdus, proc, NULL);
+  nr_fill_rx_indication(rx_ind, ind_type, ue, &dlsch[0], NULL, number_pdus, proc, NULL, p_b);
 
   LOG_D(PHY, "In %s DL PDU length in bits: %d, in bytes: %d \n", __FUNCTION__, dlsch[0].dlsch_config.TBS, dlsch[0].dlsch_config.TBS / 8);
 
@@ -883,7 +896,9 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
                              frame_rx,
                              nb_symb_sch,
                              nr_slot_rx,
-                             harq_pid);
+                             harq_pid,
+                             dlsch_bytes,
+                             p_b);
     LOG_T(PHY,"CW dlsch decoding, ret1 = %d\n", ret1);
 
     stop_meas(&ue->dlsch_decoding_stats);
@@ -899,8 +914,12 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
   if (ue->if_inst && ue->if_inst->dl_indication) {
     ue->if_inst->dl_indication(&dl_indication, ul_time_alignment);
   }
+
   // DLSCH decoding finished! don't wait anymore
   send_slot_ind(ue->tx_resume_ind_fifo[(proc->nr_slot_rx + dlsch[0].dlsch_config.k1_feedback) % ue->frame_parms.slots_per_frame], proc->nr_slot_rx);
+
+  if (ue->phy_sim_dlsch_b)
+    memcpy(ue->phy_sim_dlsch_b, p_b, dlsch_bytes);
 
   if (ue->mac_enabled == 1) { // TODO: move this from PHY to MAC layer!
 
