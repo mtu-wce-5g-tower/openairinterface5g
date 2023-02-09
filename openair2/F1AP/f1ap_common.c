@@ -99,7 +99,8 @@ int f1ap_add_ue(F1_t isCu,
       f1_inst->f1ap_ue[i].assoc_id = assoc_id;
       f1_inst->f1ap_ue[i].f1ap_uid = i;
       f1_inst->f1ap_ue[i].du_ue_f1ap_id = rntiP;
-      f1_inst->f1ap_ue[i].cu_ue_f1ap_id = rntiP;
+      AssertFatal(assoc_id <= 32767, "fatal, assoc_id too big\n");
+      f1_inst->f1ap_ue[i].cu_ue_f1ap_id = rntiP + assoc_id * 65536;
       f1_inst->num_ues++;
       LOG_I(F1AP, "Adding a new UE with RNTI %x and cu/du ue_f1ap_id %ld\n", f1_inst->f1ap_ue[i].rnti, f1_inst->f1ap_ue[i].du_ue_f1ap_id);
       return i;

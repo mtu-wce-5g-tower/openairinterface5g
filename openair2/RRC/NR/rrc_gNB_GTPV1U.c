@@ -60,7 +60,8 @@ rrc_gNB_process_GTPV1U_CREATE_TUNNEL_RESP(
     rnti = create_tunnel_resp_pP->rnti;
     ue_context_p = rrc_gNB_get_ue_context(
                      RC.nrrrc[ctxt_pP->module_id],
-                     ctxt_pP->rnti);
+                     ctxt_pP->rnti,
+                     0 /* assoc_id, not defined here, use 0 */);
 
     for (i = 0; i < create_tunnel_resp_pP->num_tunnels; i++) {
       ue_context_p->ue_context.gnb_gtp_teid[inde_list[i]]  = create_tunnel_resp_pP->enb_S1u_teid[i];
@@ -100,7 +101,8 @@ nr_rrc_gNB_process_GTPV1U_CREATE_TUNNEL_RESP(
     rnti = create_tunnel_resp_pP->rnti;
     ue_context_p = rrc_gNB_get_ue_context(
                      RC.nrrrc[ctxt_pP->module_id],
-                     ctxt_pP->rnti);
+                     ctxt_pP->rnti,
+                     create_tunnel_resp_pP->assoc_id);
 
     for (i = 0; i < create_tunnel_resp_pP->num_tunnels; i++) {
       ue_context_p->ue_context.gnb_gtp_teid[inde_list[i]]  = create_tunnel_resp_pP->gnb_NGu_teid[i];

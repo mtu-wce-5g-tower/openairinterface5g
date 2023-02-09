@@ -213,16 +213,17 @@ rrc_gNB_NGAP_get_ue_ids(
             result = rrc_gNB_NGAP_get_ue_ids(rrc_instance_pP, ue_desc_p->ue_initial_id, gNB_ue_ngap_idP);
 
             if (result != NULL) {
-              ue_context_p = rrc_gNB_get_ue_context(RC.nrrrc[GNB_INSTANCE_TO_MODULE_ID(instance)], result->ue_rnti);
+              ue_context_p = rrc_gNB_get_ue_context(RC.nrrrc[GNB_INSTANCE_TO_MODULE_ID(instance)], result->ue_rnti, result->assoc_id);
 
               if ((ue_context_p != NULL) && (ue_context_p->ue_context.gNB_ue_ngap_id == 0)) {
                 ue_context_p->ue_context.gNB_ue_ngap_id = gNB_ue_ngap_idP;
               } else {
-                LOG_E(NR_RRC, "[gNB %ld] Incoherence between RRC context and NGAP context (%d != %d) for UE RNTI %d or UE RRC context doesn't exist\n",
+                LOG_E(NR_RRC, "[gNB %ld] Incoherence between RRC context and NGAP context (%d != %d) for UE RNTI %d (assoc_id %d) or UE RRC context doesn't exist\n",
                       rrc_instance_pP - RC.nrrrc[0],
                       (ue_context_p==NULL)?99999:ue_context_p->ue_context.gNB_ue_ngap_id,
                       gNB_ue_ngap_idP,
-                      result->ue_rnti);
+                      result->ue_rnti,
+                      result->assoc_id);
               }
             }
           } else {
@@ -255,7 +256,7 @@ rrc_gNB_get_ue_context_from_ngap_ids(
   temp = rrc_gNB_NGAP_get_ue_ids(RC.nrrrc[GNB_INSTANCE_TO_MODULE_ID(instanceP)], ue_initial_idP, gNB_ue_ngap_idP);
 
   if (temp != NULL) {
-    return rrc_gNB_get_ue_context(RC.nrrrc[GNB_INSTANCE_TO_MODULE_ID(instanceP)], temp->ue_rnti);
+    return rrc_gNB_get_ue_context(RC.nrrrc[GNB_INSTANCE_TO_MODULE_ID(instanceP)], temp->ue_rnti, temp->assoc_id);
   }
 
   return NULL;
@@ -386,6 +387,7 @@ rrc_gNB_send_NGAP_NAS_FIRST_REQ(
   rrc_ue_ngap_ids_p->ue_initial_id  = ue_context_pP->ue_context.ue_initial_id;
   rrc_ue_ngap_ids_p->gNB_ue_ngap_id = UE_INITIAL_ID_INVALID;
   rrc_ue_ngap_ids_p->ue_rnti        = ctxt_pP->rnti;
+  rrc_ue_ngap_ids_p->assoc_id       = ue_context_pP->ue_context.f1ap_assoc_id;
 
   h_rc = hashtable_insert(RC.nrrrc[ctxt_pP->module_id]->initial_id2_ngap_ids,
                           (hash_key_t)ue_context_pP->ue_context.ue_initial_id,
@@ -431,19 +433,21 @@ rrc_gNB_send_NGAP_NAS_FIRST_REQ(
           if ((r_amf->plmn_Identity->mcc != NULL) && (r_amf->plmn_Identity->mcc->list.count > 0)) {
               /* Use first indicated PLMN MCC if it is defined */
               NGAP_NAS_FIRST_REQ(message_p).ue_identity.guami.mcc = *r_amf->plmn_Identity->mcc->list.array[selected_plmn_identity];
-              LOG_I(NGAP, "[gNB %d] Build NGAP_NAS_FIRST_REQ adding in s_TMSI: GUMMEI MCC %u ue %x\n",
+              LOG_I(NGAP, "[gNB %d] Build NGAP_NAS_FIRST_REQ adding in s_TMSI: GUMMEI MCC %u ue %x (assoc_id %d)\n",
                   ctxt_pP->module_id,
                   NGAP_NAS_FIRST_REQ (message_p).ue_identity.guami.mcc,
-                  ue_context_pP->ue_context.rnti);
+                  ue_context_pP->ue_context.rnti,
+                  ue_context_pP->ue_context.f1ap_assoc_id);
           }
 
           if (r_amf->plmn_Identity->mnc.list.count > 0) {
               /* Use first indicated PLMN MNC if it is defined */
               NGAP_NAS_FIRST_REQ(message_p).ue_identity.guami.mnc = *r_amf->plmn_Identity->mnc.list.array[selected_plmn_identity];
-              LOG_I(NGAP, "[gNB %d] Build NGAP_NAS_FIRST_REQ adding in s_TMSI: GUMMEI MNC %u ue %x\n",
+              LOG_I(NGAP, "[gNB %d] Build NGAP_NAS_FIRST_REQ adding in s_TMSI: GUMMEI MNC %u ue %x (assoc_id %d)\n",
                   ctxt_pP->module_id,
                   NGAP_NAS_FIRST_REQ (message_p).ue_identity.guami.mnc,
-                  ue_context_pP->ue_context.rnti);
+                  ue_context_pP->ue_context.rnti,
+                  ue_context_pP->ue_context.f1ap_assoc_id);
           }
       } else {
           /* TODO */
@@ -462,11 +466,12 @@ rrc_gNB_send_NGAP_NAS_FIRST_REQ(
       ue_context_pP->ue_context.ue_guami.amf_set_id = NGAP_NAS_FIRST_REQ(message_p).ue_identity.guami.amf_set_id;
       ue_context_pP->ue_context.ue_guami.amf_pointer = NGAP_NAS_FIRST_REQ(message_p).ue_identity.guami.amf_pointer;
 
-      LOG_I(NGAP, "[gNB %d] Build NGAP_NAS_FIRST_REQ adding in s_TMSI: GUAMI amf_set_id %u amf_region_id %u ue %x\n",
+      LOG_I(NGAP, "[gNB %d] Build NGAP_NAS_FIRST_REQ adding in s_TMSI: GUAMI amf_set_id %u amf_region_id %u ue %x (assoc_id %d)\n",
             ctxt_pP->module_id,
             NGAP_NAS_FIRST_REQ (message_p).ue_identity.guami.amf_set_id,
             NGAP_NAS_FIRST_REQ (message_p).ue_identity.guami.amf_region_id,
-            ue_context_pP->ue_context.rnti);
+            ue_context_pP->ue_context.rnti,
+            ue_context_pP->ue_context.f1ap_assoc_id);
   }
 
   itti_send_msg_to_task (TASK_NGAP, ctxt_pP->instance, message_p);

@@ -665,6 +665,7 @@ int CU_handle_UE_CONTEXT_SETUP_RESPONSE(instance_t       instance,
   LOG_D(F1AP, "f1ap_ue_context_setup_resp->gNB_DU_ue_id is: %d \n", f1ap_ue_context_setup_resp->gNB_DU_ue_id);
   f1ap_ue_context_setup_resp->rnti =
     f1ap_get_rnti_by_du_id(CUtype, instance, f1ap_ue_context_setup_resp->gNB_DU_ue_id, assoc_id);
+  f1ap_ue_context_setup_resp->assoc_id = assoc_id;
   // DUtoCURRCInformation
   F1AP_FIND_PROTOCOLIE_BY_ID(F1AP_UEContextSetupResponseIEs_t, ie, container,
                              F1AP_ProtocolIE_ID_id_DUtoCURRCInformation, true);
@@ -970,7 +971,7 @@ int CU_handle_UE_CONTEXT_RELEASE_COMPLETE(instance_t       instance,
   f1ap_setup_req_t *req = &f1ap_cu_assoc_id_to_context(assoc_id)->setupReq;
   if (req->cell_type==CELL_MACRO_GNB) {
     struct rrc_gNB_ue_context_s *ue_context_p =
-      rrc_gNB_get_ue_context(RC.nrrrc[instance], rnti);
+      rrc_gNB_get_ue_context(RC.nrrrc[instance], rnti, assoc_id);
 
     if (ue_context_p) {
       MessageDef *msg = itti_alloc_new_message(TASK_CU_F1, 0, NGAP_UE_CONTEXT_RELEASE_COMPLETE);

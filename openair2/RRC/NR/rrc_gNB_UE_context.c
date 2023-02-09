@@ -50,6 +50,14 @@ int rrc_gNB_compare_ue_rnti_id(
     return -1;
   }
 
+  if (c1_pP->ue_context.f1ap_assoc_id > c2_pP->ue_context.f1ap_assoc_id) {
+    return 1;
+  }
+
+  if (c1_pP->ue_context.f1ap_assoc_id < c2_pP->ue_context.f1ap_assoc_id) {
+    return -1;
+  }
+
   return 0;
 }
 
@@ -66,6 +74,7 @@ rrc_gNB_allocate_new_UE_context(
 )
 //------------------------------------------------------------------------------
 {
+printf("rrc_gNB_allocate_new_UE_context called\n"); fflush(stdout);
   struct rrc_gNB_ue_context_s *new_p;
   new_p = (struct rrc_gNB_ue_context_s * )malloc(sizeof(struct rrc_gNB_ue_context_s));
 
@@ -92,9 +101,12 @@ rrc_gNB_allocate_new_UE_context(
 struct rrc_gNB_ue_context_s *
 rrc_gNB_get_ue_context(
   gNB_RRC_INST *rrc_instance_pP,
-  rnti_t rntiP)
+  rnti_t rntiP,
+  int assoc_id)
 //------------------------------------------------------------------------------
 {
+printf("rrc_gNB_get_ue_context rnti %x assoc_id %d\n", rntiP, assoc_id); fflush(stdout);
+#if 0
   rrc_gNB_ue_context_t temp;
   memset(&temp, 0, sizeof(struct rrc_gNB_ue_context_s));
   /* gNB ue rrc id = 24 bits wide */
@@ -112,6 +124,15 @@ rrc_gNB_get_ue_context(
     }
     return NULL;
   }
+#endif
+  struct rrc_gNB_ue_context_s *ue_context_p = NULL;
+  RB_FOREACH(ue_context_p, rrc_nr_ue_tree_s, &(rrc_instance_pP->rrc_ue_head)) {
+printf("  in list rnti %x assoc_id %d\n", ue_context_p->ue_context.rnti, ue_context_p->ue_context.f1ap_assoc_id);
+    if (ue_context_p->ue_context.rnti == rntiP && ue_context_p->ue_context.f1ap_assoc_id == assoc_id) {
+      return ue_context_p;
+    }
+  }
+  return NULL;
 }
 
 void rrc_gNB_free_mem_UE_context(
@@ -204,13 +225,15 @@ rrc_gNB_ue_context_5g_s_tmsi_exist(
 struct rrc_gNB_ue_context_s *
 rrc_gNB_get_next_free_ue_context(
   const protocol_ctxt_t       *const ctxt_pP,
+  int                         assoc_id,
   gNB_RRC_INST                *rrc_instance_pP,
   const uint64_t               ue_identityP
 )
 //-----------------------------------------------------------------------------
 {
+printf("rrc_gNB_get_next_free_ue_context rnti %x assoc_id %d\n", ctxt_pP->rnti, assoc_id); fflush(stdout);
   struct rrc_gNB_ue_context_s        *ue_context_p = NULL;
-  ue_context_p = rrc_gNB_get_ue_context(rrc_instance_pP, ctxt_pP->rnti);
+  ue_context_p = rrc_gNB_get_ue_context(rrc_instance_pP, ctxt_pP->rnti, assoc_id);
 
   if (ue_context_p == NULL) {
     ue_context_p = rrc_gNB_allocate_new_UE_context(rrc_instance_pP);
@@ -224,6 +247,7 @@ rrc_gNB_get_next_free_ue_context(
 
     ue_context_p->ue_id_rnti                    = ctxt_pP->rnti; // here ue_id_rnti is just a key, may be something else
     ue_context_p->ue_context.rnti               = ctxt_pP->rnti; // yes duplicate, 1 may be removed
+    ue_context_p->ue_context.f1ap_assoc_id      = assoc_id;
     ue_context_p->ue_context.random_ue_identity = ue_identityP;
     RB_INSERT(rrc_nr_ue_tree_s, &rrc_instance_pP->rrc_ue_head, ue_context_p);
     LOG_D(NR_RRC,

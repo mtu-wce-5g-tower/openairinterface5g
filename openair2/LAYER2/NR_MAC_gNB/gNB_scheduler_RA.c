@@ -626,7 +626,9 @@ void nr_initiate_ra_proc(module_id_t module_idP,
     int loop = 0;
     if (ra->rnti == 0) { // This condition allows for the usage of a preconfigured rnti for the CFRA
       do {
-        ra->rnti = (taus() % 65518) + 1;
+static int next_id = 0x1000;
+        ra->rnti = next_id;
+next_id++;
         loop++;
       } while (loop != 100
                && !((find_nr_UE(&nr_mac->UE_info, ra->rnti) == NULL) && (find_nr_RA_id(module_idP, CC_id, ra->rnti) == -1)

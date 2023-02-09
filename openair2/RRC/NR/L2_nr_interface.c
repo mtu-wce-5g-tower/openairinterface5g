@@ -172,7 +172,7 @@ int8_t nr_mac_rrc_bwp_switch_req(const module_id_t     module_idP,
                                  const int             dl_bwp_id,
                                  const int             ul_bwp_id) {
 
-  struct rrc_gNB_ue_context_s *ue_context_p = rrc_gNB_get_ue_context(RC.nrrrc[module_idP], rntiP);
+  struct rrc_gNB_ue_context_s *ue_context_p = rrc_gNB_get_ue_context(RC.nrrrc[module_idP], rntiP, 0 /* no assoc_id in mac, let's use 0 */);
 
   protocol_ctxt_t ctxt;
   PROTOCOL_CTXT_SET_BY_MODULE_ID(&ctxt, module_idP, GNB_FLAG_YES, rntiP, frameP, sub_frameP, 0);
@@ -189,7 +189,7 @@ void nr_mac_gNB_rrc_ul_failure(const module_id_t Mod_instP,
   struct rrc_gNB_ue_context_s *ue_context_p = NULL;
   ue_context_p = rrc_gNB_get_ue_context(
                    RC.nrrrc[Mod_instP],
-                   rntiP);
+                   rntiP, 0 /* no assoc_id in mac, let's use 0 */);
 
   if (ue_context_p != NULL) {
     LOG_D(RRC,"Frame %d, Subframe %d: UE %x UL failure, activating timer\n",frameP,subframeP,rntiP);
@@ -205,7 +205,7 @@ void nr_mac_gNB_rrc_ul_failure_reset(const module_id_t Mod_instP,
                                      const sub_frame_t subframeP,
                                      const rnti_t rntiP) {
   struct rrc_gNB_ue_context_s *ue_context_p = NULL;
-  ue_context_p = rrc_gNB_get_ue_context(RC.nrrrc[Mod_instP], rntiP);
+  ue_context_p = rrc_gNB_get_ue_context(RC.nrrrc[Mod_instP], rntiP, 0 /* no assoc_id in mac, let's use 0 */);
   if (ue_context_p != NULL) {
     LOG_W(RRC,"Frame %d, Subframe %d: UE %x UL failure reset, deactivating timer\n",frameP,subframeP,rntiP);
     ue_context_p->ue_context.ul_failure_timer=0;

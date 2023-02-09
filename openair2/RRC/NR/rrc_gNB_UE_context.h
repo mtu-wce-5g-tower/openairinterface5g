@@ -49,7 +49,8 @@ rrc_gNB_allocate_new_UE_context(
 struct rrc_gNB_ue_context_s*
 rrc_gNB_get_ue_context(
   gNB_RRC_INST* rrc_instance_pP,
-  rnti_t rntiP
+  rnti_t rntiP,
+  int assoc_id
 );
 
 void rrc_gNB_free_mem_UE_context(
@@ -78,6 +79,7 @@ rrc_gNB_ue_context_5g_s_tmsi_exist(
 struct rrc_gNB_ue_context_s *
 rrc_gNB_get_next_free_ue_context(
   const protocol_ctxt_t       *const ctxt_pP,
+  int                         assoc_id,
   gNB_RRC_INST                *rrc_instance_pP,
   const uint64_t               ue_identityP
 );

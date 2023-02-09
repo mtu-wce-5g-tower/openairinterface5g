@@ -50,6 +50,7 @@ typedef struct rrc_ue_ngap_ids_s {
 
   // value
   rnti_t   ue_rnti;
+  int      assoc_id;
 } rrc_ue_ngap_ids_t;
 
 void

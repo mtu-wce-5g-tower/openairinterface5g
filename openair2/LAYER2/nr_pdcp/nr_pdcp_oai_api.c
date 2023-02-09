@@ -769,6 +769,7 @@ srb_found:
     AssertFatal(message_p != NULL, "OUT OF MEMORY\n");
     f1ap_ul_rrc_message_t *ul_rrc = &F1AP_UL_RRC_MESSAGE(message_p);
     ul_rrc->rnti = ue->rnti;
+    ul_rrc->assoc_id = ue->f1ap_assoc_id;
     ul_rrc->srb_id = srb_id;
     ul_rrc->rrc_container = malloc(size);
     AssertFatal(ul_rrc->rrc_container != NULL, "OUT OF MEMORY\n");
