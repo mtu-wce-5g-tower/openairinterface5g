@@ -757,7 +757,7 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
   NR_DL_UE_HARQ_t *dl_harq1 = &ue->dl_harq_processes[1][harq_pid];
   uint16_t dmrs_len = get_num_dmrs(dlsch[0].dlsch_config.dlDmrsSymbPos);
   nr_downlink_indication_t dl_indication;
-  fapi_nr_rx_indication_t *rx_ind = calloc(1, sizeof(*rx_ind));
+  fapi_nr_rx_indication_t rx_ind = {0};
   uint16_t number_pdus = 1;
   // params for UL time alignment procedure
   NR_UL_TIME_ALIGNMENT_t *ul_time_alignment = &ue->ul_time_alignment[gNB_id];
@@ -855,8 +855,8 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
       break;
   }
 
-  nr_fill_dl_indication(&dl_indication, NULL, rx_ind, proc, ue, NULL);
-  nr_fill_rx_indication(rx_ind, ind_type, ue, &dlsch[0], NULL, number_pdus, proc, NULL, p_b);
+  nr_fill_dl_indication(&dl_indication, NULL, &rx_ind, proc, ue, NULL);
+  nr_fill_rx_indication(&rx_ind, ind_type, ue, &dlsch[0], NULL, number_pdus, proc, NULL, p_b);
 
   LOG_D(PHY, "In %s DL PDU length in bits: %d, in bytes: %d \n", __FUNCTION__, dlsch[0].dlsch_config.TBS, dlsch[0].dlsch_config.TBS / 8);
 

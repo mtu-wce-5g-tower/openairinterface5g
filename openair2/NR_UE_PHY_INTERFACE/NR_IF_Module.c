@@ -1246,7 +1246,6 @@ int nr_ue_dl_indication(nr_downlink_indication_t *dl_info, NR_UL_TIME_ALIGNMENT_
             break;
         }
       }
-      free(dl_info->rx_ind);
       dl_info->rx_ind = NULL;
     }
   }
