@@ -342,7 +342,7 @@ static int encode_traffic_flow_template_packet_filters(PacketFilters* packetfilt
 {
   int encoded = 0, i, j;
 
-  for (i = 0; (i < nbpacketfilters) && (len - encoded > 0); i++) {
+  for (i = 0; (i < nbpacketfilters) ; i++) {
     if (len - encoded <= 0) {
       /* Mismatch between the number of packet filters subfield,
        * and the number of packet filters in the packet filter list */
