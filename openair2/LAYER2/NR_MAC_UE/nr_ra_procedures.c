@@ -159,7 +159,7 @@ void init_RA(module_id_t mod_id,
   prach_resources->POWER_OFFSET_2STEP_RA = 0;
   prach_resources->RA_SCALING_FACTOR_BI = 1;
 
-  struct NR_PDCCH_ConfigCommon__commonSearchSpaceList *commonSearchSpaceList;
+  struct NR_PDCCH_ConfigCommon__commonSearchSpaceList *commonSearchSpaceList = NULL;
   NR_SearchSpaceId_t *ra_ss;
   NR_SearchSpaceId_t ss_id = -1;
   NR_SearchSpace_t *ss = NULL;
