@@ -684,6 +684,7 @@ void nr_dlsch_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
   __m128i *ch_mag;
   __m128i llr128[2];
   uint32_t *llr32;
+  __m128i  xmm0 __attribute__ ((aligned(16)));
 #elif defined(__arm__) || defined(__aarch64__)
   int16x8_t *rxF = (int16x8_t*)&rxdataF_comp[(symbol*nb_rb*12)];
   int16x8_t *ch_mag;
@@ -783,6 +784,8 @@ void nr_dlsch_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 #if defined(__x86_64__) || defined(__i386__)
   __m128i *rxF = (__m128i*)&rxdataF_comp[(symbol*nb_rb*12)];
   __m128i *ch_mag,*ch_magb;
+  __m128i  xmm1 __attribute__ ((aligned(16)));
+  __m128i  xmm2 __attribute__ ((aligned(16)));
 #elif defined(__arm__) || defined(__aarch64__)
   int16x8_t *rxF = (int16x8_t*)&rxdataF_comp[(symbol*nb_rb*12)];
   int16x8_t *ch_mag,*ch_magb,xmm1,xmm2;
@@ -934,6 +937,10 @@ void nr_dlsch_256qam_llr(NR_DL_FRAME_PARMS *frame_parms,
   ch_mag = (__m128i*)&dl_ch_mag[(symbol*nb_rb*12)];
   ch_magb = (__m128i*)&dl_ch_magb[(symbol*nb_rb*12)];
   ch_magr = (__m128i*)&dl_ch_magr[(symbol*nb_rb*12)];
+
+  __m128i  xmm1 __attribute__ ((aligned(16)));
+  __m128i  xmm2 __attribute__ ((aligned(16)));
+  __m128i  xmm3 __attribute__ ((aligned(16)));
 
   len_mod4 =len&3;
   len2=len>>2;  // length in quad words (4 REs)
