@@ -428,13 +428,13 @@ int main(int argc, char **argv) {
         break;
 
       case 'C':
-        sscanf(optarg,"%d,%d,%d,%d",&carrier_freq[0],&carrier_freq[1],&carrier_freq[2],&carrier_freq[3]);
+        sscanf(optarg,"%u,%u,%u,%u",carrier_freq[0],carrier_freq[1],carrier_freq[2],carrier_freq[3]);
         printf("Configuring for frequencies %d,%d,%d,%d\n",carrier_freq[0],carrier_freq[1],carrier_freq[2],carrier_freq[3]);
         //carrier_freq = atoi(optarg);
         break;
 
       case 'G':
-        sscanf(optarg,"%d,%d,%d,%d",&rxgain[0],&rxgain[1],&rxgain[2],&rxgain[3]);
+        sscanf(optarg,"%u,%u,%u,%u",rxgain[0],rxgain[1],rxgain[2],rxgain[3]);
         printf("Configuring for gains %d,%d,%d,%d\n",rxgain[0],rxgain[1],rxgain[2],rxgain[3]);
         //rxgain = atoi(optarg);
         break;
