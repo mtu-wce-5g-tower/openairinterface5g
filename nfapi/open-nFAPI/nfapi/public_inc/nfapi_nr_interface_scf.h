@@ -474,7 +474,8 @@ typedef struct {
 
 typedef struct {
 	nfapi_p4_p5_message_header_t header;
-	uint32_t error_code;
+	uint8_t error_code;
+  uint8_t num_tlvs;
 	nfapi_pnf_param_general_t pnf_param_general;
 	nfapi_pnf_phy_t pnf_phy;
 	nfapi_vendor_extension_tlv_t vendor_extension;
@@ -489,7 +490,7 @@ typedef struct {
 
 typedef struct {
 	nfapi_p4_p5_message_header_t header;
-	uint32_t error_code;
+	uint8_t error_code;
 	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_nr_pnf_config_response_t;
 

@@ -218,7 +218,8 @@ static uint8_t pack_nr_pnf_param_response(void *msg, uint8_t **ppWritePackedMsg,
 */
 static uint8_t pack_nr_pnf_param_response(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t *config) {
   nfapi_nr_pnf_param_response_t *pNfapiMsg = (nfapi_nr_pnf_param_response_t *)msg;
-  return (push32(pNfapiMsg->error_code, ppWritePackedMsg, end) &&
+  return (push8(pNfapiMsg->error_code, ppWritePackedMsg, end) &&
+          push8(pNfapiMsg->num_tlvs, ppWritePackedMsg, end) && // numTLVs
           pack_tlv(NFAPI_PNF_PARAM_GENERAL_TAG, &pNfapiMsg->pnf_param_general, ppWritePackedMsg, end, &pack_pnf_param_general_value) &&
           pack_tlv(NFAPI_PNF_PHY_TAG, &pNfapiMsg->pnf_phy, ppWritePackedMsg, end, &pack_pnf_phy_value) &&
           pack_vendor_extension_tlv(pNfapiMsg->vendor_extension, ppWritePackedMsg, end, config));
@@ -256,8 +257,8 @@ static uint8_t pack_pnf_phy_rf_config_value(void *tlv, uint8_t **ppWritePackedMs
 
 static uint8_t pack_nr_pnf_config_request(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t *config) {
   nfapi_nr_pnf_config_request_t *pNfapiMsg = (nfapi_nr_pnf_config_request_t *)msg;
-  return (pack_tlv(NFAPI_PNF_PHY_RF_TAG, &pNfapiMsg->pnf_phy_rf_config, ppWritePackedMsg, end, &pack_pnf_phy_rf_config_value) &&
-          //push8(pNfapiMsg->num_tlvs,ppWritePackedMsg,end) &&
+  return (push8(pNfapiMsg->num_tlvs,ppWritePackedMsg,end) && // numTLVs
+          pack_tlv(NFAPI_PNF_PHY_RF_TAG, &pNfapiMsg->pnf_phy_rf_config, ppWritePackedMsg, end, &pack_pnf_phy_rf_config_value) &&
           pack_vendor_extension_tlv(pNfapiMsg->vendor_extension, ppWritePackedMsg, end, config));
 }
 
@@ -271,7 +272,7 @@ static uint8_t pack_pnf_config_request(void *msg, uint8_t **ppWritePackedMsg, ui
 
 static uint8_t pack_nr_pnf_config_response(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t *config) {
   nfapi_nr_pnf_config_response_t *pNfapiMsg = (nfapi_nr_pnf_config_response_t *)msg;
-  return ( push32(pNfapiMsg->error_code, ppWritePackedMsg, end) &&
+  return ( push8((uint8_t)pNfapiMsg->error_code, ppWritePackedMsg, end) &&
            pack_vendor_extension_tlv(pNfapiMsg->vendor_extension, ppWritePackedMsg, end, config));
 }
 
@@ -1041,7 +1042,10 @@ int nfapi_nr_p5_message_pack(void *pMessageBuf, uint32_t messageBufLen, void *pP
   uint8_t *pWritePackedMessage = pPackedBuf;
   uint8_t *pPackMessageEnd = pPackedBuf + packedBufLen;
   uint8_t *pPackedLengthField = &pWritePackedMessage[4];
+  uint8_t *pPacketBodyFieldStart = &pWritePackedMessage[8];
+  uint8_t *pPacketBodyField = &pWritePackedMessage[8];
   uint32_t packedMsgLen;
+  uint32_t packedBodyLen;
   uint16_t packedMsgLen16;
 
   if (pMessageBuf == NULL || pPackedBuf == NULL) {
@@ -1054,15 +1058,17 @@ int nfapi_nr_p5_message_pack(void *pMessageBuf, uint32_t messageBufLen, void *pP
       push16(pMessageHeader->message_id, &pWritePackedMessage, pPackMessageEnd) &&
       push16(0, &pWritePackedMessage, pPackMessageEnd) &&
       push16(pMessageHeader->spare, &pWritePackedMessage, pPackMessageEnd) &&
-      pack_nr_p5_message_body(pMessageHeader, &pWritePackedMessage, pPackMessageEnd, config)) {
-    // check for a valid message length
-    packedMsgLen = get_packed_msg_len((uintptr_t)pPackedBuf, (uintptr_t)pWritePackedMessage);
+      pack_nr_p5_message_body(pMessageHeader, &pPacketBodyField, pPackMessageEnd, config)) {
+    // to check if whole message is bigger than the buffer provided
+    packedMsgLen = get_packed_msg_len((uintptr_t)pPackedBuf, (uintptr_t)pPacketBodyField);
+    // obtain the length of the message body to pack
+    packedBodyLen = get_packed_msg_len((uintptr_t)pPacketBodyFieldStart, (uintptr_t)pPacketBodyField);
 
     if (packedMsgLen > 0xFFFF || packedMsgLen > packedBufLen) {
       NFAPI_TRACE(NFAPI_TRACE_ERROR, "Packed message length error %d, buffer supplied %d\n", packedMsgLen, packedBufLen);
       return -1;
     } else {
-      packedMsgLen16 = (uint16_t)packedMsgLen;
+      packedMsgLen16 = (uint16_t)packedBodyLen;
     }
 
     // Update the message length in the header
@@ -1297,7 +1303,8 @@ static uint8_t unpack_nr_pnf_param_response(uint8_t **ppReadPackedMsg, uint8_t *
     { NFAPI_PNF_PARAM_GENERAL_TAG, &pNfapiMsg->pnf_param_general, &unpack_pnf_param_general_value},
     { NFAPI_PNF_PHY_TAG, &pNfapiMsg->pnf_phy, &unpack_pnf_phy_value},
   };
-  return ( pull32(ppReadPackedMsg, &pNfapiMsg->error_code, end) &&
+  return ( pull8(ppReadPackedMsg, (uint8_t *)&pNfapiMsg->error_code, end) &&
+           pull8(ppReadPackedMsg, (uint8_t *)&pNfapiMsg->num_tlvs, end) &&
            unpack_tlv_list(unpack_fns, sizeof(unpack_fns)/sizeof(unpack_tlv_t), ppReadPackedMsg, end, config, &pNfapiMsg->vendor_extension));
 }
 
@@ -1336,6 +1343,7 @@ static uint8_t unpack_pnf_phy_rf_config_value(void *tlv, uint8_t **ppReadPackedM
 
 static uint8_t unpack_nr_pnf_config_request(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t *config) {
   nfapi_nr_pnf_config_request_t *pNfapiMsg = (nfapi_nr_pnf_config_request_t *)msg;
+  pull8(ppReadPackedMsg, &pNfapiMsg->num_tlvs, end);
   unpack_tlv_t unpack_fns[] = {
     { NFAPI_PNF_PHY_RF_TAG, &pNfapiMsg->pnf_phy_rf_config, &unpack_pnf_phy_rf_config_value},
   };
@@ -1355,7 +1363,7 @@ static uint8_t unpack_pnf_config_request(uint8_t **ppReadPackedMsg, uint8_t *end
 
 static uint8_t unpack_nr_pnf_config_response(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t *config) {
   nfapi_nr_pnf_config_response_t *pNfapiMsg = (nfapi_nr_pnf_config_response_t *)msg;
-  return ( pull32(ppReadPackedMsg, &pNfapiMsg->error_code, end) &&
+  return ( pull8(ppReadPackedMsg, (uint8_t *)&pNfapiMsg->error_code, end) &&
            unpack_tlv_list(NULL, 0, ppReadPackedMsg, end, config, &(pNfapiMsg->vendor_extension)));
 }
 
@@ -1584,7 +1592,7 @@ static uint8_t unpack_nr_param_response(uint8_t **ppReadPackedMsg, uint8_t *end,
   printf("\n Read message unpack_param_response: ");
 
   while(ptr < end) {
-    printf(" %d ", *ptr);
+    printf(" %02x ", *ptr);
     ptr++;
   }
 
@@ -2143,7 +2151,7 @@ int nfapi_nr_p5_message_unpack(void *pMessageBuf, uint32_t messageBufLen, void *
   printf("\n Read message unpack: ");
 
   while(ptr < end) {
-    printf(" %d ", *ptr);
+    printf(" %02x ", *ptr);
     ptr++;
   }
 
@@ -2278,7 +2286,7 @@ int nfapi_p5_message_unpack(void *pMessageBuf, uint32_t messageBufLen, void *pUn
   printf("\n Read message unpack: ");
 
   while(ptr < end) {
-    printf(" %d ", *ptr);
+    printf(" %02x ", *ptr);
     ptr++;
   }
 
