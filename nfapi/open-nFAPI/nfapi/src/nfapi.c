@@ -650,6 +650,11 @@ int unpack_tlv_list(unpack_tlv_t unpack_fns[], uint16_t size, uint8_t **ppReadPa
           NFAPI_TRACE(NFAPI_TRACE_ERROR, "Warning tlv tag 0x%x length %d not equal to unpack %ld\n", tl->tag, tl->length, (*ppReadPackedMsg - pStartOfValue));
           on_error();
         }
+        // Remove padding that ensures multiple of 4 bytes (SCF 225 Section 2.3.2.1)
+        int padding = ( 4 - (tl->length % 4) ) % 4;
+        if (padding != 0) {
+          (*ppReadPackedMsg) += padding;
+        }
       }
     }
 
@@ -673,7 +678,7 @@ int unpack_tlv_list(unpack_tlv_t unpack_fns[], uint16_t size, uint8_t **ppReadPa
 
           if((end - *ppReadPackedMsg) >= generic_tl.length) {
             // Advance past the unknown TLV
-            (*ppReadPackedMsg) += generic_tl.length;
+            (*ppReadPackedMsg) += generic_tl.length + ( 4 - (generic_tl.length % 4) ) % 4;
           } else {
             // go to the end
             return 0;
@@ -691,7 +696,7 @@ int unpack_tlv_list(unpack_tlv_t unpack_fns[], uint16_t size, uint8_t **ppReadPa
 
         if((end - *ppReadPackedMsg) >= generic_tl.length) {
           // Advance past the unknown TLV
-          (*ppReadPackedMsg) += generic_tl.length;
+          (*ppReadPackedMsg) += generic_tl.length + ( 4 - (generic_tl.length % 4) ) % 4;
         } else {
           // go to the end
           return 0;
@@ -732,6 +737,11 @@ int unpack_p7_tlv_list(unpack_p7_tlv_t unpack_fns[], uint16_t size, uint8_t **pp
           NFAPI_TRACE(NFAPI_TRACE_ERROR, "Warning tlv tag 0x%x length %d not equal to unpack %ld\n", tl->tag, tl->length, (*ppReadPackedMsg - pStartOfValue));
           on_error();
         }
+        // Remove padding that ensures multiple of 4 bytes (SCF 225 Section 2.3.2.1)
+        int padding = ( 4 - (tl->length % 4) ) % 4;
+        if (padding != 0) {
+          (*ppReadPackedMsg) += padding;
+        }
       }
     }
 
@@ -755,7 +765,7 @@ int unpack_p7_tlv_list(unpack_p7_tlv_t unpack_fns[], uint16_t size, uint8_t **pp
 
           if((end - *ppReadPackedMsg) >= generic_tl.length) {
             // Advance past the unknown TLV
-            (*ppReadPackedMsg) += generic_tl.length;
+            (*ppReadPackedMsg) += generic_tl.length + ( 4 - (generic_tl.length % 4) ) % 4;
           } else {
             // got ot the dn
             return 0;
@@ -773,7 +783,7 @@ int unpack_p7_tlv_list(unpack_p7_tlv_t unpack_fns[], uint16_t size, uint8_t **pp
 
         if((end - *ppReadPackedMsg) >= generic_tl.length) {
           // Advance past the unknown TLV
-          (*ppReadPackedMsg) += generic_tl.length;
+          (*ppReadPackedMsg) += generic_tl.length + ( 4 - (generic_tl.length % 4) ) % 4;
         } else {
           // got ot the dn
           return 0;
@@ -809,6 +819,12 @@ uint8_t pack_tlv(uint16_t tag, void *tlv, uint8_t **ppWritePackedMsg, uint8_t *e
     tl->length = (*ppWritePackedMsg) - pStartOfValue;
     // rewrite the header with the correct length
     pack_tl(tl, &pStartOfTlv, end);
+    // Add padding that ensures multiple of 4 bytes (SCF 225 Section 2.3.2.1)
+    int padding = ( 4 - (tl->length % 4) ) % 4;
+    if (padding != 0) {
+      memset(*ppWritePackedMsg,0,padding);
+      (*ppWritePackedMsg) += padding;
+    }
   } else {
     if(tl->tag != 0) {
       NFAPI_TRACE(NFAPI_TRACE_WARN, "Warning pack_tlv tag 0x%x does not match expected 0x%x\n", tl->tag, tag);
