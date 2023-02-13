@@ -236,24 +236,13 @@ services:
         container_name: rfsim5g-oai-gnb
         environment: 
             RFSIMULATOR: server
-            USE_SA_FDD_MONO: 'yes'
-            GNB_NAME: gnb-rfsim
-            TAC: 1
-            MCC: '208'
-            MNC: '99'
-            MNC_LENGTH: 2
-            NSSAI_SST: 1
-            AMF_IP_ADDRESS: 192.168.71.132
-            GNB_NGA_IF_NAME: eth0
-            GNB_NGA_IP_ADDRESS: 192.168.71.140
-            GNB_NGU_IF_NAME: eth0
-            GNB_NGU_IP_ADDRESS: 192.168.71.140
+            USE_VOLUMED_CONF: 'yes'
             USE_ADDITIONAL_OPTIONS: --sa -E --rfsim --log_config.global_log_options level,nocolor,time
-        depends_on:
-            - oai-ext-dn
         networks:
             public_net:
                 ipv4_address: 192.168.71.140
+        volumes:
+          - ./5g_fdd_rfsim.conf:/opt/oai-gnb/etc/mounted.conf
         healthcheck:
             test: /bin/bash -c "pgrep nr-softmodem"
             interval: 10s
