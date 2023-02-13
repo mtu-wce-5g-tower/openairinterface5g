@@ -186,27 +186,10 @@ services:
         network_mode: "host"
         environment:
             TZ: Europe/Paris
-            USE_NFAPI_VNF: 'yes'
-            ENB_NAME: enb-l2sim-vnf
-            MCC: '208'
-            MNC: '96'
-            MNC_LENGTH: 2
-            TAC: 1
-            UTRA_BAND_ID: 7
-            DL_FREQUENCY_IN_MHZ: 2680
-            UL_FREQUENCY_OFFSET_IN_MHZ: 120
-            NID_CELL: 10
-            NB_PRB: 25
-            MME_S1C_IP_ADDRESS: 192.168.61.3
-            ENB_INTERFACE_NAME_FOR_S1_MME: eth0
-            ENB_IPV4_ADDRESS_FOR_S1_MME: 192.168.61.1
-            ENB_INTERFACE_NAME_FOR_S1U: eth0
-            ENB_IPV4_ADDRESS_FOR_S1U: 192.168.61.1
-            ENB_IPV4_ADDRESS_FOR_X2C: 192.168.61.1
-            LOCAL_S_IF_NAME: 'lo:'
-            REMOTE_S_ADDRESS: 127.0.0.1
-            LOCAL_S_ADDRESS: 127.0.0.2
+            USE_VOLUMED_CONF: 'yes'
             USE_ADDITIONAL_OPTIONS: --MACRLCs.[0].scheduler_mode "default" --log_config.global_log_options level,nocolor,time
+        volumes:
+          - ./4g_l2sim_fdd.conf:/opt/oai-enb/etc/mounted.conf
         healthcheck:
             test: /bin/bash -c "pgrep lte-softmodem"
             interval: 10s
