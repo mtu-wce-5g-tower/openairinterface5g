@@ -1013,12 +1013,12 @@ void set_dl_mcs_table(int scs,
     }
   }
   AssertFatal(bw_rb > 0,"Could not find scs-SpecificCarrierList element for scs %d",scs);
-  const frequency_range_t freq_range = band < 100 ? FR1 : FR2;
+  const frequency_range_t freq_range = band < 200 ? FR1 : FR2;
   int bw = get_supported_band_index(scs, freq_range, bw_rb);
   AssertFatal(bw >= 0,"Supported band corresponding to %d RBs not found\n", bw_rb);
 
   bool supported = false;
-  if (band > 256) {
+  if (freq_range == FR2) {
     for (int i = 0; i < cap->rf_Parameters.supportedBandListNR.list.count; i++) {
       NR_BandNR_t *bandNRinfo = cap->rf_Parameters.supportedBandListNR.list.array[i];
       if(bandNRinfo->bandNR == band && bandNRinfo->pdsch_256QAM_FR2) {
