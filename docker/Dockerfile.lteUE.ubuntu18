@@ -29,10 +29,6 @@ FROM ran-base:latest AS lte-ue-base
 
 FROM ran-build:latest AS lte-ue-build 
 
-RUN python3 ./docker/scripts/generateTemplate.py ./docker/scripts/lte_ue_parameters.yaml && \
-    python3 ./docker/scripts/generateTemplate.py ./docker/scripts/lte_ue_sim_parameters.yaml && \
-    cp /oai-ran/docker/scripts/lte_ue_entrypoint.sh /oai-ran/docker/scripts/entrypoint.sh
-
 #start from scratch for target executable
 FROM ubuntu:bionic as oai-lte-ue
 ENV DEBIAN_FRONTEND=noninteractive
@@ -98,9 +94,7 @@ COPY --from=lte-ue-base \
 RUN /bin/bash -c "ln -s /usr/local/lib/liboai_usrpdevif.so /usr/local/lib/liboai_device.so" && \
     ldconfig
 
-# Copy the relevant configuration files for UE
-WORKDIR /opt/oai-lte-ue/etc
-COPY --from=lte-ue-build /oai-ran/docker/etc .
+COPY ./docker/scripts/lte_ue_entrypoint.sh /oai-ran/docker/scripts/entrypoint.sh
 
 WORKDIR /opt/oai-lte-ue
 CMD ["/opt/oai-lte-ue/bin/lte-uesoftmodem"]

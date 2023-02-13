@@ -29,9 +29,6 @@ FROM ran-base:latest as gnb-base
 
 FROM ran-build:latest AS gnb-build
 
-RUN python3 ./docker/scripts/generateTemplate.py ./docker/scripts/gnb_parameters.yaml && \
-    cp /oai-ran/docker/scripts/gnb_entrypoint.sh /oai-ran/docker/scripts/entrypoint.sh
-
 #start from scratch for target executable
 FROM ubuntu:bionic as oai-gnb
 ENV DEBIAN_FRONTEND=noninteractive
@@ -98,9 +95,7 @@ COPY --from=gnb-base \
 RUN /bin/bash -c "ln -s /usr/local/lib/liboai_usrpdevif.so /usr/local/lib/liboai_device.so" && \
     ldconfig
 
-# Copy the relevant configuration files for gNB
-WORKDIR /opt/oai-gnb/etc
-COPY --from=gnb-build /oai-ran/docker/etc .
+COPY ./docker/scripts/gnb_entrypoint.sh /oai-ran/docker/scripts/entrypoint.sh
 
 WORKDIR /opt/oai-gnb
 #EXPOSE 2152/udp  # S1U, GTP/UDP

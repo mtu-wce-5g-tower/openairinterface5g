@@ -29,9 +29,6 @@ FROM ran-base:latest as ru-base
 
 FROM ran-build:latest AS ru-build
 
-RUN python3 ./docker/scripts/generateTemplate.py ./docker/scripts/enb_parameters.yaml && \
-    cp /oai-ran/docker/scripts/lte_ru_entrypoint.sh /oai-ran/docker/scripts/entrypoint.sh
-
 #start from scratch for target executable
 FROM ubuntu:bionic as oai-lte-ru
 ENV DEBIAN_FRONTEND=noninteractive
@@ -88,9 +85,7 @@ COPY --from=ru-base \
 RUN /bin/bash -c "ln -s /usr/local/lib/liboai_usrpdevif.so /usr/local/lib/liboai_device.so" && \
     ldconfig
 
-# Copy the relevant configuration files for RRU
-WORKDIR /opt/oai-lte-ru/etc
-COPY --from=ru-build /oai-ran/docker/etc/rru* ./
+COPY ./docker/scripts/lte_ru_entrypoint.sh /oai-ran/docker/scripts/entrypoint.sh
 
 WORKDIR /opt/oai-lte-ru
 
