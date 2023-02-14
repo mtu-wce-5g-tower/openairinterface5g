@@ -385,7 +385,22 @@ static void match_crc_rx_pdu(nfapi_nr_rx_data_indication_t *rx_ind, nfapi_nr_crc
   }
 }
 
-void NR_UL_indication(NR_UL_IND_t *UL_info) {
+static void assign_fapi_pdu_pointers(uint32_t **fapi_pdu_list, gNB_MAC_INST *mac) {
+  if (fapi_pdu_list == NULL) return;
+
+  int count = 0;
+  for (int cc=0; cc < NFAPI_CC_MAX; cc++) {
+    for (int pdu=0; pdu < NFAPI_NR_MAX_TX_REQUEST_PDUS; pdu++) {
+      for (int tlv=0; tlv < NFAPI_NR_MAX_TX_REQUEST_TLV; tlv++) {
+        mac->TX_req[cc].pdu_list[pdu].TLVs[tlv].value.ptr = fapi_pdu_list[count];
+        mac->TX_req[cc].pdu_list[pdu].TLVs[tlv].tag = 1;
+        count++;
+      }
+    }
+  }
+}
+
+void NR_UL_indication(NR_UL_IND_t *UL_info, uint32_t **fapi_pdu_list, void *phyMsg) {
   AssertFatal(UL_info!=NULL,"UL_info is null\n");
   module_id_t      module_id   = UL_info->module_id;
   int              CC_id       = UL_info->CC_id;
@@ -451,6 +466,7 @@ void NR_UL_indication(NR_UL_IND_t *UL_info) {
   }
   if (NFAPI_MODE != NFAPI_MODE_PNF) {
     gNB_MAC_INST     *mac        = RC.nrmac[module_id];
+    assign_fapi_pdu_pointers(fapi_pdu_list, mac);
     // clear UL DCI prior to handling ULSCH
     mac->UL_dci_req[CC_id].numPdus = 0;
     if (ifi->CC_mask==0) {
@@ -494,7 +510,7 @@ void NR_UL_indication(NR_UL_IND_t *UL_info) {
                   "nr_schedule_response is null (mod %d, cc %d)\n",
                   module_id,
                   CC_id);
-      ifi->NR_Schedule_response(sched_info);
+      ifi->NR_Schedule_response(sched_info, phyMsg);
 
       LOG_D(NR_PHY,"NR_Schedule_response: SFN SLOT:%d %d dl_pdus:%d\n",
 	    sched_info->frame,
