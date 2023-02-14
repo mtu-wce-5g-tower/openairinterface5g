@@ -830,6 +830,7 @@ typedef struct processingData_L1tx {
   uint16_t num_pdsch_slot;
   int num_dl_pdcch;
   int num_ul_pdcch;
+  uint32_t **fapi_pdu_list;
 } processingData_L1tx_t;
 
 #endif
