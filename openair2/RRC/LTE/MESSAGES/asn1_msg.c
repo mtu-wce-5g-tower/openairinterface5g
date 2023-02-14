@@ -980,11 +980,11 @@ uint8_t do_SIB1(rrc_eNB_carrier_data_t *carrier,
     sib1_8h0->multiBandInfoList = NULL;
     sib1_8h0->nonCriticalExtension = calloc(1, sizeof(LTE_SystemInformationBlockType1_v9e0_IEs_t)); 
     
-    long *eutra_band;
-    eutra_band = malloc(sizeof(long));
-    eutra_band = configuration->eutra_band[CC_id];
+    long *eutra_band_ptr;
+    eutra_band_ptr = malloc(sizeof(long));
+    *eutra_band_ptr = configuration->eutra_band[CC_id];
     LTE_SystemInformationBlockType1_v9e0_IEs_t *sib1_9e0 = sib1_8h0->nonCriticalExtension;
-    sib1_9e0->freqBandIndicator_v9e0 = &eutra_band;
+    sib1_9e0->freqBandIndicator_v9e0 = eutra_band_ptr;
     sib1_9e0->multiBandInfoList_v9e0 = NULL;
     sib1_9e0->nonCriticalExtension = NULL;
     char buffer_sib8h0[1024];
@@ -995,7 +995,9 @@ uint8_t do_SIB1(rrc_eNB_carrier_data_t *carrier,
                                      1024);
     AssertFatal (enc_rval.encoded > 0, "ASN1 message encoding failed (%s, %lu)!\n",
                  enc_rval.failed_type->name, enc_rval.encoded); 
-    OCTET_STRING_fromBuf(octate,(const char *)buffer_sib8h0,(enc_rval.encoded + 7) / 8);  
+    OCTET_STRING_fromBuf(octate,(const char *)buffer_sib8h0,(enc_rval.encoded + 7) / 8);
+
+    ASN_STRUCT_FREE(asn_DEF_LTE_SystemInformationBlockType1_v8h0_IEs, sib1_8h0); 
   }
 
   sib1_890->nonCriticalExtension = calloc(1, sizeof(LTE_SystemInformationBlockType1_v920_IEs_t));
