@@ -154,6 +154,54 @@ int nr_derive_key_ng_ran_star(uint16_t pci, uint64_t nr_arfcn_dl, const uint8_t 
 
 
 
+typedef struct {
+  uint8_t  *key;
+  uint32_t  key_length;
+  uint32_t  count;
+  uint8_t   bearer;
+  uint8_t   direction;
+  uint8_t  *message;
+  // length in bits 
+  uint32_t  blength;
+} stream_cipher_t;
+
+
+/*!
+ * @brief Encrypt/Decrypt a block of data based on the provided algorithm
+ * @param[in] algorithm Algorithm used to encrypt the data
+ *      Possible values are:
+ *      - EIA0_ALG_ID for NULL encryption
+ *      - EIA1_128_ALG_ID for SNOW-3G encryption (not avalaible right now)
+ *      - EIA2_128_ALG_ID for 128 bits AES LTE encryption
+ * @param[in] stream_cipher All parameters used to compute the encrypted block of data
+ * @param[out] out The encrypted block of data dynamically allocated
+ * @return 0 if everything OK, -1 if something failed
+ */
+//int stream_encrypt(uint8_t algorithm, stream_cipher_t *stream_cipher, uint8_t **out);
+//#define stream_decrypt stream_encrypt
+
+
+int stream_compute_integrity(uint8_t algorithm, stream_cipher_t *stream_cipher, uint8_t out[4]);
+
+
+/*!
+ * @brief Decrypt a block of data based on the provided algorithm
+ * @param[in] algorithm Algorithm used to encrypt the data
+ *      Possible values are:
+ *      - EIA0_ALG_ID for NULL encryption
+ *      - EIA1_128_ALG_ID for SNOW-3G encryption (not avalaible right now)
+ *      - EIA2_128_ALG_ID for 128 bits AES LTE encryption
+ * @param[in] stream_cipher All parameters used to compute the decrypted block of data
+ * @param[out] out The decrypted block of data dynamically allocated
+ * @return 0 if everything OK, -1 if something failed
+ */
+// int stream_decrypt(uint8_t algorithm, stream_cipher_t *stream_cipher, uint8_t **out);
+
+int stream_check_integrity(uint8_t algorithm, stream_cipher_t *stream_cipher, uint8_t *expected);
+
+#undef SECU_DEBUG
+
+
 
 
 

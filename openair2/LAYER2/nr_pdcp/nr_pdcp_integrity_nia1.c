@@ -26,7 +26,8 @@
 #include <stdint.h>
 #include <openssl/cmac.h>
 
-#include "UTIL/OSA/osa_defs.h"
+//#include "UTIL/OSA/osa_defs.h"
+#include "openair3/SECU/secu_defs.h"
 
 int stream_compute_integrity_eia1(stream_cipher_t *stream_cipher, uint8_t out[4]);
 
