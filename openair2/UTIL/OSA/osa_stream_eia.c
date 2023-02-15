@@ -36,7 +36,15 @@
 
 #include "openair3/SECU/snow3g.h"
 
-#include "osa_internal.h"
+
+#ifndef hton_int32
+# define hton_int32(x)   \
+(((x & 0x000000FF) << 24) | ((x & 0x0000FF00) << 8) |  \
+((x & 0x00FF0000) >> 8) | ((x & 0xFF000000) >> 24))
+#endif
+
+
+// #include "osa_internal.h"
 
 // see spec 3GPP Confidentiality and Integrity Algorithms UEA2&UIA2. Document 1: UEA2 and UIA2 Specification. Version 1.1
 

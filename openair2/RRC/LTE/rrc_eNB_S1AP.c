@@ -46,12 +46,15 @@
 #include "pdcp.h"
 #include "pdcp_primitives.h"
 
-#include "UTIL/OSA/osa_defs.h"
+//#include "UTIL/OSA/osa_defs.h"
 
 #include "LTE_UERadioAccessCapabilityInformation.h"
 
 #include "openair3/ocp-gtpu/gtp_itf.h"
 #include <openair3/ocp-gtpu/gtp_itf.h>
+
+#include "openair3/SECU/secu_defs.h"
+
 #include "RRC/LTE/rrc_eNB_GTPV1U.h"
 
 #include "TLVDecoder.h"
@@ -495,15 +498,15 @@ rrc_pdcp_config_security(
 
   /* Derive the keys from kenb */
   if (SRB_configList != NULL) {
-    derive_key_up_enc(ue_context_pP->ue_context.ciphering_algorithm,
+    derive_key_up_enc_osa(ue_context_pP->ue_context.ciphering_algorithm,
                       ue_context_pP->ue_context.kenb,
                       &kUPenc);
   }
 
-  derive_key_rrc_enc(ue_context_pP->ue_context.ciphering_algorithm,
+  derive_key_rrc_enc_osa(ue_context_pP->ue_context.ciphering_algorithm,
                      ue_context_pP->ue_context.kenb,
                      &kRRCenc);
-  derive_key_rrc_int(ue_context_pP->ue_context.integrity_algorithm,
+  derive_key_rrc_int_osa(ue_context_pP->ue_context.integrity_algorithm,
                      ue_context_pP->ue_context.kenb,
                      &kRRCint);
  if (!IS_SOFTMODEM_IQPLAYER) {

@@ -29,7 +29,8 @@
 #include "nr_rrc_proto.h"
 #include "nr_rrc_extern.h"
 #include "openair2/COMMON/e1ap_messages_types.h"
-#include "UTIL/OSA/osa_defs.h"
+//#include "UTIL/OSA/osa_defs.h"
+#include "openair3/SECU/secu_defs.h"
 #include "nr_pdcp/nr_pdcp_entity.h"
 #include "openair2/LAYER2/nr_pdcp/nr_pdcp_e1_api.h"
 #include <openair2/RRC/NR/rrc_gNB_UE_context.h>
@@ -139,18 +140,18 @@ static int drb_config_gtpu_create(const protocol_ctxt_t *const ctxt_p,
   uint8_t *kUPint = NULL;
   /* Derive the keys from kgnb */
   if (DRB_configList != NULL) {
-    nr_derive_key_up_enc(ue_context_p->ue_context.ciphering_algorithm,
+    nr_derive_key_up_enc_osa(ue_context_p->ue_context.ciphering_algorithm,
                          ue_context_p->ue_context.kgnb,
                          &kUPenc);
-    nr_derive_key_up_int(ue_context_p->ue_context.integrity_algorithm,
+    nr_derive_key_up_int_osa(ue_context_p->ue_context.integrity_algorithm,
                          ue_context_p->ue_context.kgnb,
                          &kUPint);
   }
 
-  nr_derive_key_rrc_enc(ue_context_p->ue_context.ciphering_algorithm,
+  nr_derive_key_rrc_enc_osa(ue_context_p->ue_context.ciphering_algorithm,
                         ue_context_p->ue_context.kgnb,
                         &kRRCenc);
-  nr_derive_key_rrc_int(ue_context_p->ue_context.integrity_algorithm,
+  nr_derive_key_rrc_int_osa(ue_context_p->ue_context.integrity_algorithm,
                         ue_context_p->ue_context.kgnb,
                         &kRRCint);
   /* Refresh SRBs/DRBs */

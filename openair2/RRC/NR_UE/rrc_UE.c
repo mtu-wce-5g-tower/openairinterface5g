@@ -58,7 +58,9 @@
 #include "executables/softmodem-common.h"
 #include "plmn_data.h"
 #include "pdcp.h"
-#include "UTIL/OSA/osa_defs.h"
+//#include "UTIL/OSA/osa_defs.h"
+#include "openair3/SECU/secu_defs.h"
+
 #include "common/utils/LOG/log.h"
 #include "common/utils/LOG/vcd_signal_dumper.h"
 
@@ -1606,13 +1608,13 @@ int8_t nr_rrc_ue_decode_ccch( const protocol_ctxt_t *const ctxt_pP, const NR_SRB
    uint8_t *kRRCenc = NULL;
    uint8_t *kUPenc = NULL;
    uint8_t *kRRCint = NULL;
-  nr_derive_key_up_enc(NR_UE_rrc_inst[ctxt_pP->module_id].cipheringAlgorithm,
+  nr_derive_key_up_enc_osa(NR_UE_rrc_inst[ctxt_pP->module_id].cipheringAlgorithm,
                        NR_UE_rrc_inst[ctxt_pP->module_id].kgnb,
                        &kUPenc);
-  nr_derive_key_rrc_enc(NR_UE_rrc_inst[ctxt_pP->module_id].cipheringAlgorithm,
+  nr_derive_key_rrc_enc_osa(NR_UE_rrc_inst[ctxt_pP->module_id].cipheringAlgorithm,
                         NR_UE_rrc_inst[ctxt_pP->module_id].kgnb,
                        &kRRCenc);
-  nr_derive_key_rrc_int(NR_UE_rrc_inst[ctxt_pP->module_id].integrityProtAlgorithm,
+  nr_derive_key_rrc_int_osa(NR_UE_rrc_inst[ctxt_pP->module_id].integrityProtAlgorithm,
                         NR_UE_rrc_inst[ctxt_pP->module_id].kgnb,
                        &kRRCint);
    LOG_I(NR_RRC, "driving kRRCenc, kRRCint and kUPenc from KgNB="
@@ -1957,9 +1959,9 @@ nr_rrc_ue_establish_srb2(
 
      uint8_t *kRRCenc = NULL;
      uint8_t *kRRCint = NULL;
-     nr_derive_key_rrc_enc(NR_UE_rrc_inst[ctxt_pP->module_id].cipheringAlgorithm,
+     nr_derive_key_rrc_enc_osa(NR_UE_rrc_inst[ctxt_pP->module_id].cipheringAlgorithm,
                            NR_UE_rrc_inst[ctxt_pP->module_id].kgnb, &kRRCenc);
-     nr_derive_key_rrc_int(NR_UE_rrc_inst[ctxt_pP->module_id].integrityProtAlgorithm,
+     nr_derive_key_rrc_int_osa(NR_UE_rrc_inst[ctxt_pP->module_id].integrityProtAlgorithm,
                            NR_UE_rrc_inst[ctxt_pP->module_id].kgnb, &kRRCint);
 
      // Refresh SRBs
@@ -2054,9 +2056,9 @@ nr_rrc_ue_establish_srb2(
      uint8_t *kUPenc = NULL;
      uint8_t *kUPint = NULL;
 
-     nr_derive_key_up_enc(NR_UE_rrc_inst[ctxt_pP->module_id].cipheringAlgorithm,
+     nr_derive_key_up_enc_osa(NR_UE_rrc_inst[ctxt_pP->module_id].cipheringAlgorithm,
                           NR_UE_rrc_inst[ctxt_pP->module_id].kgnb, &kUPenc);
-     nr_derive_key_up_int(NR_UE_rrc_inst[ctxt_pP->module_id].integrityProtAlgorithm,
+     nr_derive_key_up_int_osa(NR_UE_rrc_inst[ctxt_pP->module_id].integrityProtAlgorithm,
                           NR_UE_rrc_inst[ctxt_pP->module_id].kgnb, &kUPint);
 
        // Refresh DRBs

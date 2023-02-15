@@ -46,7 +46,8 @@
 
 #include "S1AP_NAS-PDU.h"
 #include "executables/softmodem-common.h"
-#include "UTIL/OSA/osa_defs.h"
+//#include "UTIL/OSA/osa_defs.h"
+#include "openair3/SECU/secu_defs.h"
 #include "ngap_gNB_defs.h"
 #include "ngap_gNB_ue_context.h"
 #include "ngap_gNB_management_procedures.h"
@@ -309,15 +310,15 @@ nr_rrc_pdcp_config_security(
 
   /* Derive the keys from kgnb */
   if (SRB_configList != NULL) {
-    nr_derive_key_up_enc(ue_context_pP->ue_context.ciphering_algorithm,
+    nr_derive_key_up_enc_osa(ue_context_pP->ue_context.ciphering_algorithm,
                          ue_context_pP->ue_context.kgnb,
                          &kUPenc);
   }
 
-  nr_derive_key_rrc_enc(ue_context_pP->ue_context.ciphering_algorithm,
+  nr_derive_key_rrc_enc_osa(ue_context_pP->ue_context.ciphering_algorithm,
                         ue_context_pP->ue_context.kgnb,
                         &kRRCenc);
-  nr_derive_key_rrc_int(ue_context_pP->ue_context.integrity_algorithm,
+  nr_derive_key_rrc_int_osa(ue_context_pP->ue_context.integrity_algorithm,
                         ue_context_pP->ue_context.kgnb,
                         &kRRCint);
   if (!IS_SOFTMODEM_IQPLAYER) {
