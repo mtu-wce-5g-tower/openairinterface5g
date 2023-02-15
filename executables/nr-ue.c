@@ -201,6 +201,7 @@ static void process_queued_nr_nfapi_msgs(NR_UE_MAC_INST_t *mac, int sfn_slot)
     nfapi_nr_ul_tti_request_t *ul_tti_request_crc = unqueue_matching(&nr_ul_tti_req_queue, MAX_QUEUE_SIZE, sfn_slot_matcher, &mac->nr_ue_emul_l1.harq[i].active_ul_harq_sfn_slot);
     if (ul_tti_request_crc && ul_tti_request_crc->n_pdus > 0) {
       check_and_process_dci(NULL, NULL, NULL, ul_tti_request_crc);
+      free_and_zero(ul_tti_request_crc);
     }
   }
 
@@ -230,6 +231,8 @@ static void process_queued_nr_nfapi_msgs(NR_UE_MAC_INST_t *mac, int sfn_slot)
       if (get_softmodem_params()->nsa)
         save_nr_measurement_info(dl_tti_request);
       check_and_process_dci(dl_tti_request, tx_data_request, NULL, NULL);
+      free_and_zero(dl_tti_request);
+      free_and_zero(tx_data_request);
     }
     else {
       AssertFatal(false, "We dont have PDUs in either dl_tti %d or tx_req %d\n",
@@ -238,6 +241,7 @@ static void process_queued_nr_nfapi_msgs(NR_UE_MAC_INST_t *mac, int sfn_slot)
   }
   if (ul_dci_request && ul_dci_request->numPdus > 0) {
     check_and_process_dci(NULL, NULL, ul_dci_request, NULL);
+    free_and_zero(ul_dci_request);
   }
 }
 
@@ -322,14 +326,6 @@ static void *NRUE_phy_stub_standalone_pnf_task(void *arg)
 
     if (pthread_mutex_lock(&mac->mutex_dl_info)) abort();
 
-    memset(&mac->dl_info, 0, sizeof(mac->dl_info));
-    mac->dl_info.cc_id = CC_id;
-    mac->dl_info.gNB_index = gNB_id;
-    mac->dl_info.module_id = mod_id;
-    mac->dl_info.frame = frame;
-    mac->dl_info.slot = slot;
-    mac->dl_info.dci_ind = NULL;
-    mac->dl_info.rx_ind = NULL;
     if (ch_info) {
       mac->nr_ue_emul_l1.pmi = ch_info->csi[0].pmi;
       mac->nr_ue_emul_l1.ri = ch_info->csi[0].ri;
@@ -341,6 +337,14 @@ static void *NRUE_phy_stub_standalone_pnf_task(void *arg)
                       mac->scc->tdd_UL_DL_ConfigurationCommon :
                       mac->scc_SIB->tdd_UL_DL_ConfigurationCommon,
                       ul_info.slot_rx)) {
+      memset(&mac->dl_info, 0, sizeof(mac->dl_info));
+      mac->dl_info.cc_id = CC_id;
+      mac->dl_info.gNB_index = gNB_id;
+      mac->dl_info.module_id = mod_id;
+      mac->dl_info.frame = frame;
+      mac->dl_info.slot = slot;
+      mac->dl_info.dci_ind = NULL;
+      mac->dl_info.rx_ind = NULL;
       nr_ue_dl_indication(&mac->dl_info, &ul_time_alignment);
     }
 
