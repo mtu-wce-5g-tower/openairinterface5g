@@ -822,9 +822,9 @@ target_link_libraries(UTIL PRIVATE asn1_nr_rrc asn1_lte_rrc)
 
 set(SECU_OSA_SRC
   ${OPENAIR2_DIR}/UTIL/OSA/osa_key_deriver.c
-  ${OPENAIR2_DIR}/UTIL/OSA/osa_rijndael.c
-  ${OPENAIR2_DIR}/UTIL/OSA/osa_snow3g.c
-  ${OPENAIR2_DIR}/UTIL/OSA/osa_stream_eea.c
+  #  ${OPENAIR2_DIR}/UTIL/OSA/osa_rijndael.c
+  #  ${OPENAIR2_DIR}/UTIL/OSA/osa_snow3g.c
+  #  ${OPENAIR2_DIR}/UTIL/OSA/osa_stream_eea.c
   ${OPENAIR2_DIR}/UTIL/OSA/osa_stream_eia.c
     )
 add_library(SECU_OSA ${SECU_OSA_SRC} $<TARGET_OBJECTS:ds> )
@@ -1398,8 +1398,8 @@ set(NR_PDCP_SRC
   #computation is done directly inside nr_pdcp_integrity_nia1.c instead
   #of reusing code of osa_stream_eia.c
   ${OPENAIR2_DIR}/UTIL/OSA/osa_stream_eia.c
-  ${OPENAIR2_DIR}/UTIL/OSA/osa_snow3g.c
-  ${OPENAIR2_DIR}/UTIL/OSA/osa_rijndael.c
+  #  ${OPENAIR2_DIR}/UTIL/OSA/osa_snow3g.c
+  #  ${OPENAIR2_DIR}/UTIL/OSA/osa_rijndael.c
   )
 
 set(NR_SDAP_SRC

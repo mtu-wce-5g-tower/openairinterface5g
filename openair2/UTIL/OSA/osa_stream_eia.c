@@ -32,7 +32,10 @@
 #include "openair3/SECU/aes_128_cbc_cmac.h"
 
 #include "osa_defs.h"
-#include "osa_snow3g.h"
+//#include "osa_snow3g.h"
+
+#include "openair3/SECU/snow3g.h"
+
 #include "osa_internal.h"
 
 // see spec 3GPP Confidentiality and Integrity Algorithms UEA2&UIA2. Document 1: UEA2 and UIA2 Specification. Version 1.1
@@ -113,9 +116,11 @@ uint32_t osa_mask32bit(int n)
  * @param[in] stream_cipher Structure containing various variables to setup encoding
  * @param[out] out For EIA2 the output string is 32 bits long
  */
+
+
 int stream_compute_integrity_eia1(stream_cipher_t *stream_cipher, uint8_t out[4])
 {
-  osa_snow_3g_context_t snow_3g_context;
+  snow_3g_context_t snow_3g_context;
   uint32_t K[4], IV[4], z[5];
   int i = 0, D;
   uint32_t MAC_I = 0;
@@ -129,22 +134,15 @@ int stream_compute_integrity_eia1(stream_cipher_t *stream_cipher, uint8_t out[4]
   uint32_t mask = 0;
   uint32_t *message;
 
-  message = (uint32_t *)stream_cipher->message; /* To operate 32 bit message internally. */
-  /* Load the Integrity Key for SNOW3G initialization as in section 4.4. */
-  memcpy(K + 3, stream_cipher->key + 0, 4); /*K[3] = key[0]; we assume
-          K[3]=key[0]||key[1]||...||key[31] , with key[0] the
-          * most important bit of key*/
-  memcpy(K + 2, stream_cipher->key + 4, 4); /*K[2] = key[1];*/
-  memcpy(K + 1, stream_cipher->key + 8, 4); /*K[1] = key[2];*/
-  memcpy(K + 0, stream_cipher->key + 12, 4); /*K[0] = key[3]; we assume
-          K[0]=key[96]||key[97]||...||key[127] , with key[127] the
-          * least important bit of key*/
+  message = (uint32_t *)stream_cipher->message; 
+  memcpy(K + 3, stream_cipher->key + 0, 4);
+  memcpy(K + 2, stream_cipher->key + 4, 4); 
+  memcpy(K + 1, stream_cipher->key + 8, 4); 
+  memcpy(K + 0, stream_cipher->key + 12, 4);
   K[3] = hton_int32(K[3]);
   K[2] = hton_int32(K[2]);
   K[1] = hton_int32(K[1]);
   K[0] = hton_int32(K[0]);
-  /* Prepare the Initialization Vector (IV) for SNOW3G initialization as in
-    section 4.4. */
   IV[3] = (uint32_t)stream_cipher->count;
   IV[2] = ((((uint32_t)stream_cipher->bearer) & 0x0000001F) << 27);
   IV[1] = (uint32_t)(stream_cipher->count) ^ ((uint32_t)(stream_cipher->direction) << 31);
@@ -163,9 +161,8 @@ int stream_compute_integrity_eia1(stream_cipher_t *stream_cipher, uint8_t out[4]
   // printf ("IV[2]:%08X\n",IV[2]);
   // printf ("IV[3]:%08X\n",IV[3]);
   z[0] = z[1] = z[2] = z[3] = z[4] = 0;
-  /* Run SNOW 3G to produce 5 keystream words z_1, z_2, z_3, z_4 and z_5. */
-  osa_snow3g_initialize(K, IV, &snow_3g_context);
-  osa_snow3g_generate_key_stream(5, z, &snow_3g_context);
+  snow3g_initialize(K, IV, &snow_3g_context);
+  snow3g_generate_key_stream(5, z, &snow_3g_context);
   // printf ("z[0]:%08X\n",z[0]);
   // printf ("z[1]:%08X\n",z[1]);
   // printf ("z[2]:%08X\n",z[2]);
@@ -175,20 +172,16 @@ int stream_compute_integrity_eia1(stream_cipher_t *stream_cipher, uint8_t out[4]
   Q = ((uint64_t)z[2] << 32) | (uint64_t)z[3];
   // printf ("P:%16lX\n",P);
   // printf ("Q:%16lX\n",Q);
-  /* Calculation */
   D = ceil(stream_cipher->blength / 64.0) + 1;
   // printf ("D:%d\n",D);
   EVAL = 0;
   c = 0x1b;
 
-  /* for 0 <= i <= D-3 */
   for (i = 0; i < D - 2; i++) {
     V = EVAL ^ ((uint64_t)hton_int32(message[2 * i]) << 32 | (uint64_t)hton_int32(message[2 * i + 1]));
     EVAL = OSA_MUL64(V, P, c);
-    // printf ("Mi: %16X %16X\tEVAL: %16lX\n",hton_int32(message[2*i]),hton_int32(message[2*i+1]), EVAL);
   }
 
-  /* for D-2 */
   rem_bits = stream_cipher->blength % 64;
 
   if (rem_bits == 0)
@@ -204,9 +197,7 @@ int stream_compute_integrity_eia1(stream_cipher_t *stream_cipher, uint8_t out[4]
 
   V = EVAL ^ M_D_2;
   EVAL = OSA_MUL64(V, P, c);
-  /* for D-1 */
   EVAL ^= stream_cipher->blength;
-  /* Multiply by Q */
   EVAL = OSA_MUL64(EVAL, Q, c);
   MAC_I = (uint32_t)(EVAL >> 32) ^ z[4];
   // printf ("MAC_I:%16X\n",MAC_I);
@@ -214,6 +205,8 @@ int stream_compute_integrity_eia1(stream_cipher_t *stream_cipher, uint8_t out[4]
   memcpy(out, &MAC_I, 4);
   return 0;
 }
+
+
 
 int stream_compute_integrity_eia2(stream_cipher_t *stream_cipher, uint8_t out[4])
 {
