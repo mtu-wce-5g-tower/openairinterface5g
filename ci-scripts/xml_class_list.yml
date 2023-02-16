@@ -19,7 +19,6 @@
   - CheckStatusUE
   - Ping
   - Iperf
-  - Reboot_UE
   - Deploy_EPC
   - Undeploy_EPC
   - Initialize_HSS
