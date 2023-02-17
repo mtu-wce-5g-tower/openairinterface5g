@@ -25,19 +25,13 @@
 #include <string.h>
 #include <math.h> // double ceil(double x);
 
-#include "secu_defs.h"
+#include "nas_stream_eia1.h"
 
 #include "assertions.h"
 #include "conversions.h"
 #include "snow3g.h"
 
 #define SECU_DEBUG
-
-uint64_t MUL64x(uint64_t V, uint64_t c);
-uint64_t MUL64xPOW(uint64_t V, uint32_t i, uint64_t c);
-uint64_t MUL64(uint64_t V, uint64_t P, uint64_t c);
-int      nas_stream_encrypt_eia1(nas_stream_cipher_t *stream_cipher, uint8_t out[4]);
-
 
 // see spec 3GPP Confidentiality and Integrity Algorithms UEA2&UIA2. Document 1: UEA2 and UIA2 Specification. Version 1.1
 
@@ -49,6 +43,7 @@ int      nas_stream_encrypt_eia1(nas_stream_cipher_t *stream_cipher, uint8_t out
  * function.
  * See section 4.3.2 for details.
  */
+static 
 uint64_t MUL64x(uint64_t V, uint64_t c)
 {
   if ( V & 0x8000000000000000 )
@@ -65,6 +60,7 @@ uint64_t MUL64x(uint64_t V, uint64_t c)
 function.
  * See section 4.3.3 for details.
  */
+static
 uint64_t MUL64xPOW(uint64_t V, uint32_t i, uint64_t c)
 {
   if ( i == 0)
@@ -81,6 +77,7 @@ uint64_t MUL64xPOW(uint64_t V, uint32_t i, uint64_t c)
  * function.
  * See section 4.3.4 for details.
  */
+static
 uint64_t MUL64(uint64_t V, uint64_t P, uint64_t c)
 {
   uint64_t result = 0;
@@ -99,6 +96,7 @@ uint64_t MUL64(uint64_t V, uint64_t P, uint64_t c)
 * Output : a 32 bit mask.
 * Prepares a 32 bit mask with required number of 1 bits on the MSB side.
 */
+static
 uint32_t mask32bit(int n)
 {
   uint32_t mask=0x0;
@@ -118,7 +116,7 @@ uint32_t mask32bit(int n)
  * @param[in] stream_cipher Structure containing various variables to setup encoding
  * @param[out] out For EIA1 the output string is 32 bits long
  */
-int nas_stream_encrypt_eia1(nas_stream_cipher_t *stream_cipher, uint8_t out[4])
+void nas_stream_encrypt_eia1(nas_stream_cipher_t *stream_cipher, uint8_t out[4])
 {
   snow_3g_context_t snow_3g_context;
   uint32_t        K[4],IV[4], z[5];
@@ -218,5 +216,6 @@ int nas_stream_encrypt_eia1(nas_stream_cipher_t *stream_cipher, uint8_t out[4])
   //printf ("MAC_I:%16X\n",MAC_I);
   MAC_I = hton_int32(MAC_I);
   memcpy(out, &MAC_I, 4);
-  return 0;
+
 }
+

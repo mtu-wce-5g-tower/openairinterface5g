@@ -51,6 +51,13 @@ Description Defines the layer 3 messages supported by the NAS sublayer
 # include "nas_itti_messaging.h"
 #endif
 #include "secu_defs.h"
+#include "nas_stream_eea1.h"
+#include "nas_stream_eea2.h"
+
+#include "nas_stream_eia1.h"
+#include "nas_stream_eia2.h"
+
+
 #include "emmData.h"
 
 //#define DEBUG_NAS_MESSAGE
@@ -1019,6 +1026,7 @@ static int _nas_message_decrypt(
       /* length in bits */
       stream_cipher.blength    = length << 3;
       nas_stream_encrypt_eea1(&stream_cipher, (unsigned char *)dest);
+
       /* Decode the first octet (security header type or EPS bearer identity,
        * and protocol discriminator) */
       DECODE_U8(dest, *(uint8_t*)(&header), size);

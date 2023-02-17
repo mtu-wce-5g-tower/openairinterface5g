@@ -19,31 +19,15 @@
  *      contact@openairinterface.org
  */
 
+
+#ifndef OAI_NAS_STREAM_EEA1_H
+#define OAI_NAS_STREAM_EEA1_H
+
 #include "secu_defs.h"
 
-#include "common/utils/assertions.h"
-#include "common/utils/LOG/log.h"
+#include <stdlib.h>
+#include <stdint.h>
 
-#include "nas_stream_eea1.h"
-#include "nas_stream_eea2.h"
+void nas_stream_encrypt_eea1(nas_stream_cipher_t *stream_cipher, uint8_t *out);
 
-#include "nas_stream_eia1.h"
-#include "nas_stream_eia2.h"
-
-void stream_compute_integrity(uint8_t algorithm, nas_stream_cipher_t *stream_cipher, uint8_t out[4])
-{
-  if (algorithm == EIA1_128_ALG_ID) {
-    LOG_D(OSA, "EIA1 algorithm applied for integrity\n");
-      // stream_compute_integrity_eia1(stream_cipher, out);
-      nas_stream_encrypt_eia1(stream_cipher, out);
-  } else if (algorithm == EIA2_128_ALG_ID) {
-    LOG_D(OSA, "EIA2 algorithm applied for integrity\n");
-     // nas_stream_compute_integrity_eia2(stream_cipher, out);
-       nas_stream_encrypt_eia2(stream_cipher, out);
-  } else {
-    LOG_E(OSA, "Provided integrity algorithm is currently not supported = %u\n", algorithm);
-    DevAssert("Unknown Algorithm type");
-  }
-
-}
-
+#endif
