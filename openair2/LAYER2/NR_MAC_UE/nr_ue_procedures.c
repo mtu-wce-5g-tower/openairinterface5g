@@ -1850,7 +1850,7 @@ int16_t get_pucch_tx_power_ue(NR_UE_MAC_INST_t *mac,
     }
   }
 
-  if (*power_config->twoPUCCH_PC_AdjustmentStates > 1) {
+  if (power_config->twoPUCCH_PC_AdjustmentStates && *power_config->twoPUCCH_PC_AdjustmentStates > 1) {
     LOG_E(MAC,"PUCCH power control adjustment states with 2 states not yet implemented\n");
     return (PUCCH_POWER_DEFAULT);
   }
@@ -1976,11 +1976,16 @@ int find_pucch_resource_set(NR_UE_MAC_INST_t *mac, int uci_size) {
 *********************************************************************/
 
 void select_pucch_resource(NR_UE_MAC_INST_t *mac,
-                           PUCCH_sched_t *pucch) {
+                           PUCCH_sched_t *pucch,
+                           int O_SR, int O_ACK, int O_CSI)
+{
 
   NR_PUCCH_ResourceId_t *current_resource_id = NULL;
   NR_BWP_Id_t bwp_id = mac->current_UL_BWP.bwp_id;
-  int n_list;
+
+  int resource_set_id = -1;
+  if(O_ACK > 0)
+    resource_set_id = find_pucch_resource_set(mac, O_ACK + O_CSI);
 
   if (pucch->is_common == 1 ||
       (bwp_id == 0 &&
@@ -2028,31 +2033,33 @@ void select_pucch_resource(NR_UE_MAC_INST_t *mac,
       resourceToAddModList = mac->cg->spCellConfig->spCellConfigDedicated->uplinkConfig->initialUplinkBWP->pucch_Config->choice.setup->resourceToAddModList;
     }
 
-    n_list = resourceSetToAddModList->list.count;
-    if (pucch->resource_set_id > n_list) {
-      LOG_E(MAC,"Invalid PUCCH resource set id %d\n",pucch->resource_set_id);
-      pucch->pucch_resource = NULL;
-      return;
-    }
-    n_list = resourceSetToAddModList->list.array[pucch->resource_set_id]->resourceList.list.count;
-    if (pucch->resource_indicator > n_list) {
-      LOG_E(MAC,"Invalid PUCCH resource id %d\n",pucch->resource_indicator);
-      pucch->pucch_resource = NULL;
-      return;
-    }
-    current_resource_id = resourceSetToAddModList->list.array[pucch->resource_set_id]->resourceList.list.array[pucch->resource_indicator];
-    n_list = resourceToAddModList->list.count;
-    int res_found = 0;
-    for (int i=0; i<n_list; i++) {
-      if (resourceToAddModList->list.array[i]->pucch_ResourceId == *current_resource_id) {
-        pucch->pucch_resource = resourceToAddModList->list.array[i];
-        res_found = 1;
-        break;
+    if(resource_set_id != -1) {
+      int res_found = 0;
+      int n_list = resourceSetToAddModList->list.count;
+      if (resource_set_id > n_list) {
+        LOG_E(MAC,"Invalid PUCCH resource set id %d\n", resource_set_id);
+        pucch->pucch_resource = NULL;
+        return;
       }
-    }
-    if (res_found == 0) {
-      LOG_E(MAC,"Couldn't find PUCCH Resource\n");
-      pucch->pucch_resource = NULL;
+      n_list = resourceSetToAddModList->list.array[resource_set_id]->resourceList.list.count;
+      if (pucch->resource_indicator > n_list) {
+        LOG_E(MAC,"Invalid PUCCH resource id %d\n", pucch->resource_indicator);
+        pucch->pucch_resource = NULL;
+       return;
+      }
+      current_resource_id = resourceSetToAddModList->list.array[resource_set_id]->resourceList.list.array[pucch->resource_indicator];
+      n_list = resourceToAddModList->list.count;
+      for (int i = 0; i < n_list; i++) {
+        if (resourceToAddModList->list.array[i]->pucch_ResourceId == *current_resource_id) {
+          pucch->pucch_resource = resourceToAddModList->list.array[i];
+          res_found = 1;
+          break;
+        }
+      }
+      if (res_found == 0) {
+        LOG_E(MAC,"Couldn't find PUCCH Resource\n");
+        pucch->pucch_resource = NULL;
+      }
     }
   }
 }
@@ -2342,12 +2349,12 @@ bool trigger_periodic_scheduling_request(NR_UE_MAC_INST_t *mac,
     if ((sfn_sf - SR_offset) % SR_period == 0) {
       LOG_D(MAC, "Scheduling Request active in frame %d slot %d \n", frame, slot);
       NR_PUCCH_ResourceId_t *PucchResourceId = SchedulingRequestResourceConfig->resource;
-
+      int n_list = pucch_Config->resourceToAddModList->list.count;
       int found = -1;
-      NR_PUCCH_ResourceSet_t *pucchresset = pucch_Config->resourceSetToAddModList->list.array[0]; // set with formats 0,1
-      int n_list = pucchresset->resourceList.list.count;
-       for (int i=0; i<n_list; i++) {
-        if (*pucchresset->resourceList.list.array[i] == *PucchResourceId ) {
+      for (int i=0; i<n_list; i++) {
+        struct NR_PUCCH_Resource *pucch_Resource = pucch_Config->resourceToAddModList->list.array[i];
+        if (pucch_Resource->pucch_ResourceId == *PucchResourceId ) {
+          pucch->pucch_resource = pucch_Resource;
           found = i;
           break;
         }
@@ -2460,13 +2467,13 @@ uint8_t nr_get_csi_measurements(NR_UE_MAC_INST_t *mac,
         if (((n_slots_frame*frame + slot - offset)%period) == 0 && pucch_Config) {
           LOG_D(NR_MAC, "Preparing CSI report in frame %d slot %d CSI report ID %d\n", frame, slot, csi_report_id);
           NR_PUCCH_CSI_Resource_t *pucchcsires = csirep->reportConfigType.choice.periodic->pucch_CSI_ResourceList.list.array[0];
-          NR_PUCCH_ResourceSet_t *pucchresset = pucch_Config->resourceSetToAddModList->list.array[1]; // set with formats >1
-          int n = pucchresset->resourceList.list.count;
+          int n = pucch_Config->resourceToAddModList->list.count;
 
-          int res_index;
           int found = -1;
-          for (res_index = 0; res_index < n; res_index++) {
-            if (*pucchresset->resourceList.list.array[res_index] == pucchcsires->pucch_Resource) {
+          for (int res_index = 0; res_index < n; res_index++) {
+            struct NR_PUCCH_Resource *pucch_Resource = pucch_Config->resourceToAddModList->list.array[res_index];
+            if (pucch_Resource->pucch_ResourceId == pucchcsires->pucch_Resource) {
+              pucch->pucch_resource = pucch_Resource;
               found = res_index;
               break;
             }

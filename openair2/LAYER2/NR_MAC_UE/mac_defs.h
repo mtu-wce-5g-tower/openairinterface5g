@@ -360,7 +360,6 @@ typedef struct {
   uint32_t csi_part1_payload;
   uint32_t csi_part2_payload;
   int resource_indicator;
-  int resource_set_id;
   int is_common;
   int initial_pucch_id;
   NR_PUCCH_Resource_t *pucch_resource;

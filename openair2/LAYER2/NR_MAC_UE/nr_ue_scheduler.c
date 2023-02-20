@@ -2359,9 +2359,8 @@ void nr_ue_pucch_scheduler(module_id_t module_idP, frame_t frameP, int slotP, vo
     return;
 
   if (N_UCI > 0) {
-    LOG_D(NR_MAC,"%d.%d configure pucch, O_SR %d, O_ACK %d, O_CSI %d\n",frameP,slotP,O_SR,O_ACK,O_CSI);
-    pucch.resource_set_id = find_pucch_resource_set(mac, O_ACK + O_CSI);
-    select_pucch_resource(mac, &pucch);
+    LOG_D(NR_MAC,"%d.%d configure pucch, O_SR %d, O_ACK %d, O_CSI %d\n", frameP, slotP, O_SR, O_ACK, O_CSI);
+    select_pucch_resource(mac, &pucch, O_SR, O_ACK, O_CSI);
     fapi_nr_ul_config_request_t *ul_config = get_ul_config_request(mac, slotP);
     pthread_mutex_lock(&ul_config->mutex_ul_config);
     AssertFatal(ul_config->number_pdus<FAPI_NR_UL_CONFIG_LIST_NUM, "ul_config->number_pdus %d out of bounds\n",ul_config->number_pdus);

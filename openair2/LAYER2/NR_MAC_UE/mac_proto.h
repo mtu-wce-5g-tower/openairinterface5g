@@ -306,7 +306,8 @@ uint8_t get_downlink_ack(NR_UE_MAC_INST_t *mac,
 int find_pucch_resource_set(NR_UE_MAC_INST_t *mac, int uci_size);
 
 void select_pucch_resource(NR_UE_MAC_INST_t *mac,
-                           PUCCH_sched_t *pucch);
+                           PUCCH_sched_t *pucch,
+                           int O_SR, int O_ACK, int O_CSI);
 
 int16_t get_pucch_tx_power_ue(NR_UE_MAC_INST_t *mac,
                               int scs,
