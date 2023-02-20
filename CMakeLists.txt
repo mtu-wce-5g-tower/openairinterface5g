@@ -820,17 +820,6 @@ add_library(UTIL
 )
 target_link_libraries(UTIL PRIVATE asn1_nr_rrc asn1_lte_rrc)
 
-set(SECU_OSA_SRC
-  #${OPENAIR2_DIR}/UTIL/OSA/osa_key_deriver.c
-  #  ${OPENAIR2_DIR}/UTIL/OSA/osa_rijndael.c
-  #  ${OPENAIR2_DIR}/UTIL/OSA/osa_snow3g.c
-  #  ${OPENAIR2_DIR}/UTIL/OSA/osa_stream_eea.c
-  #${OPENAIR2_DIR}/UTIL/OSA/osa_stream_eia.c
-    )
-add_library(SECU_OSA ${SECU_OSA_SRC} $<TARGET_OBJECTS:ds> )
-
-target_include_directories(SECU_OSA PRIVATE ${OPENAIR_DIR}/common/utils/ds/)
-
 set(SECU_CN_SRC
   ${OPENAIR3_DIR}/SECU/secu_defs.c
   ${OPENAIR3_DIR}/SECU/kdf.c
@@ -2229,7 +2218,7 @@ add_dependencies(lte-softmodem oai_iqplayer)
 
 target_link_libraries(lte-softmodem PRIVATE
   -Wl,--start-group
-  lte_rrc nr_rrc s1ap m2ap x2ap m3ap GTPV1U f1ap SECU_CN SECU_OSA UTIL HASHTABLE SCTP_CLIENT MME_APP SCHED_LIB SCHED_RU_LIB
+  lte_rrc nr_rrc s1ap m2ap x2ap m3ap GTPV1U f1ap SECU_CN UTIL HASHTABLE SCTP_CLIENT MME_APP SCHED_LIB SCHED_RU_LIB
   PHY_COMMON PHY PHY_RU  L2 L2_LTE NFAPI_COMMON_LIB NFAPI_LIB NFAPI_VNF_LIB NFAPI_PNF_LIB NFAPI_USER_LIB MISC_NFAPI_LTE_LIB
   ${RAL_LIB} ${NAS_UE_LIB} ITTI SIMU
   -Wl,--end-group z dl)
@@ -2268,7 +2257,7 @@ add_dependencies(ocp-enb oai_iqplayer coding params_libconfig rfsimulator)
 
 target_link_libraries (ocp-enb
   -Wl,--start-group
-  lte_rrc nr_rrc s1ap f1ap m2ap x2ap m3ap GTPV1U SECU_CN SECU_OSA UTIL HASHTABLE SCTP_CLIENT MME_APP SCHED_LIB SCHED_RU_LIB
+  lte_rrc nr_rrc s1ap f1ap m2ap x2ap m3ap GTPV1U SECU_CN UTIL HASHTABLE SCTP_CLIENT MME_APP SCHED_LIB SCHED_RU_LIB
   PHY_COMMON PHY PHY_RU L2 L2_LTE NFAPI_COMMON_LIB NFAPI_LIB MISC_NFAPI_LTE_LIB NFAPI_VNF_LIB NFAPI_PNF_LIB NFAPI_USER_LIB SIMU
   ${RAL_LIB} ${NAS_UE_LIB} ITTI
   -Wl,--end-group z dl)
@@ -2329,7 +2318,7 @@ endif()
 target_link_libraries(lte-uesoftmodem PRIVATE
   -Wl,--start-group
   lte_rrc nr_rrc s1ap x2ap m2ap m3ap
-  SECU_CN SECU_OSA UTIL HASHTABLE SCTP_CLIENT MME_APP SCHED_RU_LIB SCHED_UE_LIB PHY_COMMON
+  SECU_CN UTIL HASHTABLE SCTP_CLIENT MME_APP SCHED_RU_LIB SCHED_UE_LIB PHY_COMMON
   PHY_UE PHY_RU L2_UE L2_LTE SIMU NFAPI_COMMON_LIB NFAPI_LIB NFAPI_PNF_LIB NFAPI_USER_LIB MISC_NFAPI_LTE_LIB
   ${RAL_LIB} ${NAS_UE_LIB} ITTI ${ATLAS_LIBRARIES}
   -Wl,--end-group z dl)
@@ -2372,7 +2361,7 @@ add_executable(nr-softmodem
 
 target_link_libraries(nr-softmodem PRIVATE
   -Wl,--start-group
-  UTIL HASHTABLE SCTP_CLIENT SCHED_LIB SCHED_RU_LIB SCHED_NR_LIB PHY_NR PHY PHY_COMMON PHY_NR_COMMON PHY_RU GTPV1U SECU_CN SECU_OSA
+  UTIL HASHTABLE SCTP_CLIENT SCHED_LIB SCHED_RU_LIB SCHED_NR_LIB PHY_NR PHY PHY_COMMON PHY_NR_COMMON PHY_RU GTPV1U SECU_CN
   ITTI ${RAL_LIB} ${NAS_UE_LIB} lte_rrc nr_rrc
   ngap s1ap L2_LTE_NR L2_NR MAC_NR_COMMON NFAPI_COMMON_LIB NFAPI_LIB NFAPI_VNF_LIB NFAPI_PNF_LIB NFAPI_USER_LIB SIMU
   x2ap f1ap m2ap m3ap e1ap
@@ -2410,7 +2399,7 @@ add_executable(nr-cuup
 target_link_libraries(nr-cuup PRIVATE
                       CONFIG_LIB ITTI SCTP_CLIENT
                       GTPV1U e1ap e1_pdcp_if f1ap
-                      SECU_OSA SECU_CN ${OPENSSL_LIBRARIES} crypt z sctp dl pthread)
+                      SECU_CN ${OPENSSL_LIBRARIES} crypt z sctp dl pthread)
 target_link_libraries(nr-cuup PRIVATE asn1_lte_rrc asn1_nr_rrc)
                       
 # nr-uesoftmodem is  UE implementation
@@ -2438,7 +2427,7 @@ add_executable(nr-uesoftmodem
 
 target_link_libraries(nr-uesoftmodem PRIVATE
   -Wl,--start-group
-  nr_rrc SECU_CN SECU_OSA UTIL HASHTABLE SCHED_RU_LIB SCHED_NR_UE_LIB
+  nr_rrc SECU_CN UTIL HASHTABLE SCHED_RU_LIB SCHED_NR_UE_LIB
   PHY_COMMON PHY_NR_COMMON PHY_NR_UE NR_L2_UE L2_UE_LTE_NR MAC_NR_COMMON NFAPI_COMMON_LIB NFAPI_LIB NFAPI_PNF_LIB
   NFAPI_USER_LIB MISC_NFAPI_NR_LIB
   ${RAL_LIB} ITTI ${ATLAS_LIBRARIES} LIB_5GNAS_GNB LIB_NAS_SIMUE ${NAS_SIM_LIB} SIMU
@@ -2700,7 +2689,7 @@ if (${T_TRACER})
         ITTI lte_rrc nr_rrc s1ap x2ap m2ap m3ap f1ap
         params_libconfig oai_usrpdevif oai_bladerfdevif oai_lmssdrdevif oai_iqplayer
         oai_eth_transpro oai_mobipass coding HASHTABLE UTIL OMG_SUMO
-        SECU_OSA SECU_CN SCHED_LIB SCHED_NR_LIB SCHED_RU_LIB SCHED_UE_LIB SCHED_NR_UE_LIB default_sched remote_sched RAL
+        SECU_CN SCHED_LIB SCHED_NR_LIB SCHED_RU_LIB SCHED_UE_LIB SCHED_NR_UE_LIB default_sched remote_sched RAL
         NFAPI_COMMON_LIB NFAPI_LIB NFAPI_PNF_LIB NFAPI_VNF_LIB NFAPI_USER_LIB
         PHY_COMMON PHY PHY_UE PHY_NR PHY_NR_COMMON PHY_NR_UE PHY_RU PHY_MEX
         L2 L2_LTE L2_NR L2_LTE_NR L2_UE NR_L2_UE L2_UE_LTE_NR MAC_NR_COMMON MAC_NR MAC_UE_NR ngap

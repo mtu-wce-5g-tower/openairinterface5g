@@ -5398,15 +5398,15 @@ rrc_eNB_process_RRCConnectionReconfigurationComplete(
 
   /* Derive the keys from kenb */
   if (DRB_configList != NULL) {
-    derive_key_up_enc(ue_context_pP->ue_context.ciphering_algorithm,
+    derive_key_nas(UP_ENC_ALG ,ue_context_pP->ue_context.ciphering_algorithm,
                       ue_context_pP->ue_context.kenb,
                       kUPenc);
   }
 
-  derive_key_rrc_enc(ue_context_pP->ue_context.ciphering_algorithm,
+  derive_key_nas(RRC_ENC_ALG, ue_context_pP->ue_context.ciphering_algorithm,
                      ue_context_pP->ue_context.kenb,
                      kRRCenc);
-  derive_key_rrc_int(ue_context_pP->ue_context.integrity_algorithm,
+  derive_key_nas(RRC_INT_ALG, ue_context_pP->ue_context.integrity_algorithm,
                      ue_context_pP->ue_context.kenb,
                      kRRCint);
   /* Refresh SRBs/DRBs */

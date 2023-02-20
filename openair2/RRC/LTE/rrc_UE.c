@@ -1246,9 +1246,11 @@ rrc_ue_process_radioResourceConfigDedicated(
   if (radioResourceConfigDedicated->srb_ToAddModList) {
     uint8_t kRRCenc[16] = {0};
     uint8_t kRRCint[16] = {0};
-    derive_key_rrc_enc(UE_rrc_inst[ctxt_pP->module_id].ciphering_algorithm,
+    derive_key_nas(RRC_ENC_ALG,
+                       UE_rrc_inst[ctxt_pP->module_id].ciphering_algorithm,
                        UE_rrc_inst[ctxt_pP->module_id].kenb, kRRCenc);
-    derive_key_rrc_int(UE_rrc_inst[ctxt_pP->module_id].integrity_algorithm,
+    derive_key_nas(RRC_INT_ALG,
+                       UE_rrc_inst[ctxt_pP->module_id].integrity_algorithm,
                        UE_rrc_inst[ctxt_pP->module_id].kenb, kRRCint);
     // Refresh SRBs
     rrc_pdcp_config_asn1_req(ctxt_pP,
@@ -1396,7 +1398,8 @@ rrc_ue_process_radioResourceConfigDedicated(
     }
 
     uint8_t kUPenc[16] = {0};
-    derive_key_up_enc(UE_rrc_inst[ctxt_pP->module_id].integrity_algorithm,
+    derive_key_nas(UP_ENC_ALG,
+                      UE_rrc_inst[ctxt_pP->module_id].integrity_algorithm,
                       UE_rrc_inst[ctxt_pP->module_id].kenb, kUPenc);
     // Refresh DRBs
     rrc_pdcp_config_asn1_req(ctxt_pP,
@@ -1575,11 +1578,14 @@ rrc_ue_process_securityModeCommand(
           UE_rrc_inst[ctxt_pP->module_id].kenb[20], UE_rrc_inst[ctxt_pP->module_id].kenb[21], UE_rrc_inst[ctxt_pP->module_id].kenb[22], UE_rrc_inst[ctxt_pP->module_id].kenb[23],
           UE_rrc_inst[ctxt_pP->module_id].kenb[24], UE_rrc_inst[ctxt_pP->module_id].kenb[25], UE_rrc_inst[ctxt_pP->module_id].kenb[26], UE_rrc_inst[ctxt_pP->module_id].kenb[27],
           UE_rrc_inst[ctxt_pP->module_id].kenb[28], UE_rrc_inst[ctxt_pP->module_id].kenb[29], UE_rrc_inst[ctxt_pP->module_id].kenb[30], UE_rrc_inst[ctxt_pP->module_id].kenb[31]);
-    derive_key_rrc_enc(UE_rrc_inst[ctxt_pP->module_id].ciphering_algorithm,
+    derive_key_nas(RRC_ENC_ALG,
+                       UE_rrc_inst[ctxt_pP->module_id].ciphering_algorithm,
                        UE_rrc_inst[ctxt_pP->module_id].kenb, kRRCenc);
-    derive_key_rrc_int(UE_rrc_inst[ctxt_pP->module_id].integrity_algorithm,
+    derive_key_nas(RRC_INT_ALG,
+                       UE_rrc_inst[ctxt_pP->module_id].integrity_algorithm,
                        UE_rrc_inst[ctxt_pP->module_id].kenb, kRRCint);
-    derive_key_up_enc(UE_rrc_inst[ctxt_pP->module_id].ciphering_algorithm,
+    derive_key_nas(UP_ENC_ALG,
+                      UE_rrc_inst[ctxt_pP->module_id].ciphering_algorithm,
                       UE_rrc_inst[ctxt_pP->module_id].kenb, kUPenc);
 
     if (securityMode != 0xff) {
