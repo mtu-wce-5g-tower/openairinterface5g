@@ -1034,7 +1034,6 @@ int main(int argc, char **argv)
     double blerStats[16] = {0};
     double berStats[16] = {0};
 
-    clear_pusch_stats(gNB);
     for (trial = 0; trial < n_trials; trial++) {
 
       uint8_t round = 0;
