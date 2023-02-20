@@ -54,6 +54,7 @@
 #include <openair3/ocp-gtpu/gtp_itf.h>
 
 #include "openair3/SECU/secu_defs.h"
+#include "openair3/SECU/key_nas_deriver.h"
 
 #include "RRC/LTE/rrc_eNB_GTPV1U.h"
 
@@ -488,9 +489,9 @@ rrc_pdcp_config_security(
 //------------------------------------------------------------------------------
 {
   LTE_SRB_ToAddModList_t             *SRB_configList = ue_context_pP->ue_context.SRB_configList;
-  uint8_t                            *kRRCenc = NULL;
-  uint8_t                            *kRRCint = NULL;
-  uint8_t                            *kUPenc = NULL;
+  uint8_t                            kRRCenc[16] = {0};
+  uint8_t                            kRRCint[16] = {0} ;
+  uint8_t                            kUPenc[16] = {0};
   pdcp_t                             *pdcp_p   = NULL;
   static int                          print_keys= 1;
   hashtable_rc_t                      h_rc;
@@ -498,17 +499,17 @@ rrc_pdcp_config_security(
 
   /* Derive the keys from kenb */
   if (SRB_configList != NULL) {
-    derive_key_up_enc_osa(ue_context_pP->ue_context.ciphering_algorithm,
+    derive_key_up_enc(ue_context_pP->ue_context.ciphering_algorithm,
                       ue_context_pP->ue_context.kenb,
-                      &kUPenc);
+                      kUPenc);
   }
 
-  derive_key_rrc_enc_osa(ue_context_pP->ue_context.ciphering_algorithm,
+  derive_key_rrc_enc(ue_context_pP->ue_context.ciphering_algorithm,
                      ue_context_pP->ue_context.kenb,
-                     &kRRCenc);
-  derive_key_rrc_int_osa(ue_context_pP->ue_context.integrity_algorithm,
+                     kRRCenc);
+  derive_key_rrc_int(ue_context_pP->ue_context.integrity_algorithm,
                      ue_context_pP->ue_context.kenb,
-                     &kRRCint);
+                     kRRCint);
  if (!IS_SOFTMODEM_IQPLAYER) {
   SET_LOG_DUMP(DEBUG_SECURITY) ;
  }
@@ -518,8 +519,8 @@ rrc_pdcp_config_security(
     if (print_keys ==1 ) {
       print_keys =0;
       LOG_DUMPMSG(RRC, DEBUG_SECURITY, ue_context_pP->ue_context.kenb, 32,"\nKeNB:" );
-      LOG_DUMPMSG(RRC, DEBUG_SECURITY, kRRCenc, 32,"\nKRRCenc:" );
-      LOG_DUMPMSG(RRC, DEBUG_SECURITY, kRRCint, 32,"\nKRRCint:" );
+      LOG_DUMPMSG(RRC, DEBUG_SECURITY, kRRCenc, 16,"\nKRRCenc:" );
+      LOG_DUMPMSG(RRC, DEBUG_SECURITY, kRRCint, 16,"\nKRRCint:" );
     }
   }
 

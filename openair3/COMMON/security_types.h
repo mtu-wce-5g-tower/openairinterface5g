@@ -63,6 +63,7 @@ STRING_TO_XBITS(sTRING, 16, cONTAINER, rET)
 # define STRING_TO_256BITS(sTRING, cONTAINER, rET)  \
 STRING_TO_XBITS(sTRING, 32, cONTAINER, rET)
 
+/*
 # define STRING_TO_RAND      STRING_TO_128BITS
 # define STRING_TO_AUTH_KEY  STRING_TO_128BITS
 # define STRING_TO_AUTH_RES  STRING_TO_128BITS
@@ -74,6 +75,8 @@ do {                                                            \
     if (rET != -1)                                              \
         (cONTAINER)->size = lENGTH;                             \
 } while(0)
+
+*/
 
 /* RES amd XRES can have a variable length of 4-16 octets */
 typedef struct {
@@ -107,10 +110,12 @@ typedef struct eutran_vector_s {
   uint8_t kasme[KASME_LENGTH_OCTETS];
 } eutran_vector_t;
 
+/*
 #define FC_KASME        (0x10)
 #define FC_KENB         (0x11)
 #define FC_NH           (0x12)
 #define FC_KENB_STAR    (0x13)
+*/
 /* 33401 #A.7 Algorithm for key derivation function.
  * This FC should be used for:
  * - NAS Encryption algorithm
@@ -119,9 +124,10 @@ typedef struct eutran_vector_s {
  * - RRC Integrity algorithm
  * - User Plane Encryption algorithm
  */
-#define FC_ALG_KEY_DER  (0x15)
-#define FC_KASME_TO_CK  (0x16)
+//#define FC_ALG_KEY_DER  (0x15)
+//#define FC_KASME_TO_CK  (0x16)
 
+/*
 typedef enum {
   NAS_ENC_ALG = 0x01,
   NAS_INT_ALG = 0x02,
@@ -130,5 +136,6 @@ typedef enum {
   UP_ENC_ALG  = 0x05,
   UP_INT_ALG  = 0x06
 } algorithm_type_dist_t;
+*/
 
 #endif /* SECURITY_TYPES_H_ */

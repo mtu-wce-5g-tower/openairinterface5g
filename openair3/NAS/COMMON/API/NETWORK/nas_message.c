@@ -51,14 +51,9 @@ Description Defines the layer 3 messages supported by the NAS sublayer
 # include "nas_itti_messaging.h"
 #endif
 #include "secu_defs.h"
-#include "nas_stream_eea1.h"
-#include "nas_stream_eea2.h"
-
-#include "nas_stream_eia1.h"
-#include "nas_stream_eia2.h"
-
-
 #include "emmData.h"
+
+
 
 //#define DEBUG_NAS_MESSAGE
 
@@ -1025,7 +1020,7 @@ static int _nas_message_decrypt(
       stream_cipher.message    = (unsigned char *)src;
       /* length in bits */
       stream_cipher.blength    = length << 3;
-      nas_stream_encrypt_eea1(&stream_cipher, (unsigned char *)dest);
+      stream_compute_encrypt(EEA1_128_ALG_ID , &stream_cipher, (unsigned char *)dest);
 
       /* Decode the first octet (security header type or EPS bearer identity,
        * and protocol discriminator) */
@@ -1060,7 +1055,8 @@ static int _nas_message_decrypt(
       stream_cipher.message    = (unsigned char *)src;
       /* length in bits */
       stream_cipher.blength    = length << 3;
-      nas_stream_encrypt_eea1(&stream_cipher, (unsigned char *)dest);
+      stream_compute_encrypt(EEA1_128_ALG_ID, &stream_cipher, (unsigned char *)dest);
+      
       /* Decode the first octet (security header type or EPS bearer identity,
        * and protocol discriminator) */
       DECODE_U8(dest, *(uint8_t*)(&header), size);
@@ -1189,8 +1185,7 @@ static int _nas_message_encrypt(
       stream_cipher.message    = (unsigned char *)src;
       /* length in bits */
       stream_cipher.blength    = length << 3;
-      nas_stream_encrypt_eea1(&stream_cipher, (unsigned char *)dest);
-
+      stream_compute_encrypt(EEA1_128_ALG_ID, &stream_cipher, (unsigned char *)dest);
       LOG_FUNC_RETURN (length);
 
     }
@@ -1220,7 +1215,7 @@ static int _nas_message_encrypt(
       stream_cipher.message    = (unsigned char *)src;
       /* length in bits */
       stream_cipher.blength    = length << 3;
-      nas_stream_encrypt_eea2(&stream_cipher, (unsigned char *)dest);
+      stream_compute_encrypt(EEA2_128_ALG_ID, &stream_cipher, (unsigned char *)dest);
 
       LOG_FUNC_RETURN (length);
 
@@ -1359,10 +1354,16 @@ static uint32_t _nas_message_get_mac(
     stream_cipher.message    = (unsigned char *)buffer;
     /* length in bits */
     stream_cipher.blength    = length << 3;
+    stream_compute_integrity(EIA1_128_ALG_ID, &stream_cipher, mac);
 
-    nas_stream_encrypt_eia1(
-      &stream_cipher,
-      mac);
+    //nas_stream_cipher_t *stream_cipher, uint8_t out[4]);
+
+    //nas_stream_encrypt_eia1(
+    //  &stream_cipher,
+    //  mac);
+
+
+
     LOG_TRACE(DEBUG,
               "NAS_SECURITY_ALGORITHMS_EIA1 returned MAC %x.%x.%x.%x(%u) for length %d direction %d, count %d",
               mac[0], mac[1], mac[2],mac[3],
@@ -1405,10 +1406,8 @@ static uint32_t _nas_message_get_mac(
     stream_cipher.message    = (unsigned char *)buffer;
     /* length in bits */
     stream_cipher.blength    = length << 3;
+    stream_compute_integrity(EIA2_128_ALG_ID, &stream_cipher, mac);
 
-    nas_stream_encrypt_eia2(
-      &stream_cipher,
-      mac);
     LOG_TRACE(DEBUG,
               "NAS_SECURITY_ALGORITHMS_EIA2 returned MAC %x.%x.%x.%x(%u) for length %d direction %d, count %d",
               mac[0], mac[1], mac[2],mac[3],

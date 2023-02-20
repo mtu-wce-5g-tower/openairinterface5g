@@ -138,10 +138,10 @@ int is_x2ap_enabled(void)
   return 0;
 }
 
-int nr_derive_key(int alg_type, uint8_t alg_id,
-               const uint8_t key[32], uint8_t **out)
+void nr_derive_key(int alg_type, uint8_t alg_id,
+               const uint8_t key[32], uint8_t out[16])
 {
-  return 0;
+  (void)alg_type;
 }
 
 int DU_send_INITIAL_UL_RRC_MESSAGE_TRANSFER(module_id_t     module_idP,

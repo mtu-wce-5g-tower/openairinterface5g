@@ -169,9 +169,9 @@ typedef struct pdcp_s {
    * Control-Plane RRC integrity key
    * These keys are configured by RRC layer
    */
-  uint8_t *kUPenc;
-  uint8_t *kRRCint;
-  uint8_t *kRRCenc;
+  uint8_t kUPenc[16];
+  uint8_t kRRCint[16];
+  uint8_t kRRCenc[16];
 
   uint8_t security_activated;
 

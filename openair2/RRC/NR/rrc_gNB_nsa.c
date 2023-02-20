@@ -43,6 +43,7 @@
 #include <openair3/ocp-gtpu/gtp_itf.h>
 //#include "UTIL/OSA/osa_defs.h"
 #include "openair3/SECU/secu_defs.h"
+#include "openair3/SECU/key_nas_deriver.h"
 
 #include <openair2/RRC/NR/nr_rrc_proto.h>
 
@@ -127,8 +128,8 @@ void rrc_add_nsa_user(gNB_RRC_INST *rrc,struct rrc_gNB_ue_context_s *ue_context_
   gtpv1u_enb_create_tunnel_req_t  create_tunnel_req;
   gtpv1u_enb_create_tunnel_resp_t create_tunnel_resp;
   protocol_ctxt_t ctxt={0};
-  unsigned char *kUPenc = NULL;
-  unsigned char *kUPint = NULL;
+  uint8_t kUPenc[16] = {0};
+  uint8_t kUPint[16] = {0};
   int i;
 
   // In case of phy-test and do-ra mode, read UE capabilities directly from file
@@ -224,12 +225,12 @@ void rrc_add_nsa_user(gNB_RRC_INST *rrc,struct rrc_gNB_ue_context_s *ue_context_
     LOG_I(RRC, "selecting integrity algorithm %d\n", ue_context_p->ue_context.integrity_algorithm);
 
     /* derive UP security key */
-    nr_derive_key_up_enc_osa(ue_context_p->ue_context.ciphering_algorithm,
+    nr_derive_key(UP_ENC_ALG, ue_context_p->ue_context.ciphering_algorithm,
                          ue_context_p->ue_context.kgnb,
-                         &kUPenc);
-    nr_derive_key_up_int_osa(ue_context_p->ue_context.integrity_algorithm,
+                         kUPenc);
+    nr_derive_key(UP_INT_ALG ,ue_context_p->ue_context.integrity_algorithm,
                          ue_context_p->ue_context.kgnb,
-                         &kUPint);
+                         kUPint);
 
     e_NR_CipheringAlgorithm cipher_algo;
     switch (ue_context_p->ue_context.ciphering_algorithm) {

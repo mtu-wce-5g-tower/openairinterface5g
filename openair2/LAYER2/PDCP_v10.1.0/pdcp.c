@@ -2186,9 +2186,11 @@ pdcp_config_set_security(
           PROTOCOL_PDCP_CTXT_ARGS(ctxt_pP,pdcp_pP),
           pdcp_pP->cipheringAlgorithm,
           pdcp_pP->integrityProtAlgorithm);
-    pdcp_pP->kRRCenc = kRRCenc;
-    pdcp_pP->kRRCint = kRRCint;
-    pdcp_pP->kUPenc  = kUPenc;
+    
+    memcpy(pdcp_pP->kRRCenc, kRRCenc, 16);
+    memcpy(pdcp_pP->kRRCint, kRRCint, 16);
+    memcpy(pdcp_pP->kUPenc, kUPenc, 16);
+
     /* Activate security */
     pdcp_pP->security_activated = 1;
   }

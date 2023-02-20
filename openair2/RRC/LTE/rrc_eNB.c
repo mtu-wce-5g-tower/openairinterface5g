@@ -5363,9 +5363,9 @@ rrc_eNB_process_RRCConnectionReconfigurationComplete(
   int                                 drb_id;
   int                                 oip_ifup = 0;
   int                                 dest_ip_offset = 0;
-  uint8_t                            *kRRCenc = NULL;
-  uint8_t                            *kRRCint = NULL;
-  uint8_t                            *kUPenc = NULL;
+  uint8_t                            kRRCenc[16] = {0};
+  uint8_t                            kRRCint[16] = {0};
+  uint8_t                            kUPenc[16] = {0};
   LTE_DRB_ToAddModList_t             *DRB_configList = ue_context_pP->ue_context.DRB_configList2[xid];
   LTE_SRB_ToAddModList_t             *SRB_configList = ue_context_pP->ue_context.SRB_configList2[xid];
   LTE_DRB_ToReleaseList_t            *DRB_Release_configList2 = ue_context_pP->ue_context.DRB_Release_configList2[xid];
@@ -5398,17 +5398,17 @@ rrc_eNB_process_RRCConnectionReconfigurationComplete(
 
   /* Derive the keys from kenb */
   if (DRB_configList != NULL) {
-    derive_key_up_enc_osa(ue_context_pP->ue_context.ciphering_algorithm,
+    derive_key_up_enc(ue_context_pP->ue_context.ciphering_algorithm,
                       ue_context_pP->ue_context.kenb,
-                      &kUPenc);
+                      kUPenc);
   }
 
-  derive_key_rrc_enc_osa(ue_context_pP->ue_context.ciphering_algorithm,
+  derive_key_rrc_enc(ue_context_pP->ue_context.ciphering_algorithm,
                      ue_context_pP->ue_context.kenb,
-                     &kRRCenc);
-  derive_key_rrc_int_osa(ue_context_pP->ue_context.integrity_algorithm,
+                     kRRCenc);
+  derive_key_rrc_int(ue_context_pP->ue_context.integrity_algorithm,
                      ue_context_pP->ue_context.kenb,
-                     &kRRCint);
+                     kRRCint);
   /* Refresh SRBs/DRBs */
   rrc_pdcp_config_asn1_req(ctxt_pP,
                            SRB_configList, // NULL,

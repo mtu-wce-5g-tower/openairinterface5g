@@ -25,11 +25,11 @@
 #include "common/utils/assertions.h"
 #include "common/utils/LOG/log.h"
 #include "kdf.h"
+#include "key_nas_deriver.h"
 #include "nas_stream_eea1.h"
 #include "nas_stream_eea2.h"
 #include "nas_stream_eia1.h"
 #include "nas_stream_eia2.h"
-#include "security_types.h"
 #include "secu_defs.h"
 #include "snow3g.h"
 #include <arpa/inet.h>
@@ -41,11 +41,29 @@
 #include <string.h>
 
 
-#define SECU_DEBUG 1
+#define FC_KENB         (0x11)
+#define FC_NH           (0x12)
+#define FC_KENB_STAR    (0x13)
+/* 33401 #A.7 Algorithm for key derivation function.
+ * This FC should be used for:
+ * - NAS Encryption algorithm
+ * - NAS Integrity algorithm
+ * - RRC Encryption algorithm
+ * - RRC Integrity algorithm
+ * - User Plane Encryption algorithm
+ */
+#define FC_ALG_KEY_DER  (0x15)
+#define FC_KASME_TO_CK  (0x16)
+
+#define NR_FC_ALG_KEY_DER  (0x69)
+#define NR_FC_ALG_KEY_NG_RAN_STAR_DER  (0x70)
+
+
+//#define SECU_DEBUG 1
 
 
 static
-void derive_key_common(algorithm_type_dist_t alg_type, uint8_t alg_id, const uint8_t kasme[32], uint8_t FC, uint8_t *knas)
+void derive_key_common(algorithm_type_dist_t alg_type, uint8_t alg_id, const uint8_t kasme[32], uint8_t FC, uint8_t knas[16])
 {
 
   uint8_t s[7];
@@ -102,96 +120,15 @@ void derive_key_common(algorithm_type_dist_t alg_type, uint8_t alg_id, const uin
  * @param[in] kasme Key for MME as provided by AUC
  * @param[out] knas Pointer to reference where output of KDF will be stored.
  */
-void derive_key_nas(algorithm_type_dist_t alg_type, uint8_t alg_id, const uint8_t kasme[32], uint8_t *knas)
+void derive_key_nas(algorithm_type_dist_t alg_type, uint8_t alg_id, const uint8_t kasme[32], uint8_t knas[16])
 {
-
-  derive_key_common(alg_type, alg_id, kasme,  FC_ALG_KEY_DER, knas);
-/*
-  uint8_t s[7];
-#if defined(SECU_DEBUG)
-  int i;
-#endif
-
-  // FC 
-  s[0] = FC_ALG_KEY_DER;
-
-  // P0 = algorithm type distinguisher //
-  s[1] = (uint8_t)(nas_alg_type & 0xFF);
-
-  // L0 = length(P0) = 1 //
-  s[2] = 0x00;
-  s[3] = 0x01;
-
-  // P1 
-  s[4] = nas_enc_alg_id;
-
-  // L1 = length(P1) = 1 
-  s[5] = 0x00;
-  s[6] = 0x01;
-
-#if defined(SECU_DEBUG)
-  printf("%s FC %d nas_alg_type distinguisher %d nas_enc_alg_identity %d\n",
-         __FUNCTION__, FC_ALG_KEY_DER, nas_alg_type, nas_enc_alg_id);
-
-  for (i = 0; i < 7; i ++) {
-    printf("0x%02x ", s[i]);
-  }
-
-  printf("\n");
-#endif
-
-  byte_array_t data = {.len = 7, .buf = s};
-  uint8_t out[32];
-  kdf(kasme, data, 32, out);
-
-  memcpy(knas, &out[31-16+1], 16);
-  */
+  derive_key_common(alg_type, alg_id, kasme, FC_ALG_KEY_DER, knas);
 }
 
-void nr_derive_key(algorithm_type_dist_t alg_type, uint8_t alg_id, const uint8_t key[32], uint8_t **out)
+void nr_derive_key(algorithm_type_dist_t alg_type, uint8_t alg_id, const uint8_t key[32], uint8_t out[16])
 {
-   if (*out == NULL) {
-    *out = malloc(sizeof(uint8_t) * 32);
-    DevAssert(*out != NULL && "Memory exhausted");
-  }
-
-  derive_key_common(alg_type, alg_id, key, NR_FC_ALG_KEY_DER, *out);
-
-/*
-  uint8_t string[7];
-
-  // FC 
-  string[0] = NR_FC_ALG_KEY_DER;
-
-  // P0 = algorithm type distinguisher 
-  string[1] = (uint8_t)(alg_type & 0xFF);
-
-  // L0 = length(P0) = 1 
-  string[2] = 0x00;
-  string[3] = 0x01;
-
-  // P1 
-  string[4] = alg_id;
-
-  // L1 = length(P1) = 1 
-  string[5] = 0x00;
-  string[6] = 0x01;
-
-  byte_array_t data = {.buf = string, .len = 7};
-
-  if (*out == NULL) {
-    *out = malloc(sizeof(uint8_t) * 32);
-    DevAssert(*out != NULL && "Memory exhausted");
-  }
-  kdf(key, data, 32, *out);
-
-  // in NR, we use the last 16 bytes, ignoring the first 16 ones
-  memcpy(*out, *out + 16, 16);
-*/
-
+  derive_key_common(alg_type, alg_id, key, NR_FC_ALG_KEY_DER, out);
 }
-
-
 
 
 /*!
@@ -208,18 +145,6 @@ void nr_derive_key(algorithm_type_dist_t alg_type, uint8_t alg_id, const uint8_t
  * @param[out] out Pointer to reference where output of KDF will be stored.
  * NOTE: knas is dynamically allocated by the KDF function
  */
-
-
-void derive_key_alloca(algorithm_type_dist_t alg_type, uint8_t alg_id, const uint8_t key[32], uint8_t **out)
-{
-  if (*out == NULL) {
-    *out = malloc(sizeof(uint8_t) * 32);
-    DevAssert(*out != NULL && "Memory exhausted");
-  }
-
-  derive_key_nas(alg_type, alg_id, key, *out);
-
-}
 
 #ifndef NAS_UE
 void derive_keNB(const uint8_t kasme[32], const uint32_t nas_count, uint8_t *keNB)
@@ -238,7 +163,6 @@ void derive_keNB(const uint8_t kasme[32], const uint32_t nas_count, uint8_t *keN
   s[5] = 0x00;
   s[6] = 0x04;
 
- // kdf(kasme, 32, s, 7, keNB, 32);
   byte_array_t data = {.buf = s, .len = 7}; 
   kdf(kasme, data, 32, keNB);
 
@@ -269,7 +193,6 @@ void derive_keNB_star(
     s[6] = (earfcn_dl & 0x000000ff);
 	s[7] = 0x00;
 	s[8] = 0x02;
-//	kdf (kenb_32, 32, s, 9, kenb_star, 32);
   data.len = 9;
   } else {
 	s[5] = (earfcn_dl & 0x00ff0000) >> 16;
@@ -277,7 +200,6 @@ void derive_keNB_star(
 	s[7] = (earfcn_dl & 0x000000ff);
 	s[8] = 0x00;
 	s[9] = 0x03;
-	//kdf (kenb_32, 32, s, 10, kenb_star, 32);
   data.len = 10;
   }
 
@@ -289,7 +211,6 @@ void derive_keNB_star(
   // would lead to different derived keys if another entity assumed an input parameter length of 3 bytes for the
   // EARFCN-DL.
 }
-
 
 void nr_derive_key_ng_ran_star(uint16_t pci, uint64_t nr_arfcn_dl, const uint8_t key[32], uint8_t *key_ng_ran_star)
 {
@@ -315,11 +236,9 @@ void nr_derive_key_ng_ran_star(uint16_t pci, uint64_t nr_arfcn_dl, const uint8_t
   s[8] = 0x00;
   s[9] = 0x03;
 
-
   byte_array_t data = {.buf = s, .len = 10};
   const uint32_t len_key = 32;
   kdf(key, data, len_key, key_ng_ran_star);
-
 }
 
 void derive_skgNB(const uint8_t *keNB, const uint16_t sk_counter, uint8_t *skgNB)

@@ -103,7 +103,8 @@
 
 
 #include "common/ran_context.h"
-#include "secu_defs.h"
+#include "key_nas_deriver.h"
+
 
 #if !defined (msg)
   #define msg printf
