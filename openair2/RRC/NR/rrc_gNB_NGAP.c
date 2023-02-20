@@ -46,7 +46,6 @@
 
 #include "S1AP_NAS-PDU.h"
 #include "executables/softmodem-common.h"
-//#include "UTIL/OSA/osa_defs.h"
 #include "openair3/SECU/key_nas_deriver.h"
 
 #include "ngap_gNB_defs.h"

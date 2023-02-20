@@ -46,8 +46,6 @@
 #include "pdcp.h"
 #include "pdcp_primitives.h"
 
-//#include "UTIL/OSA/osa_defs.h"
-
 #include "LTE_UERadioAccessCapabilityInformation.h"
 
 #include "openair3/ocp-gtpu/gtp_itf.h"

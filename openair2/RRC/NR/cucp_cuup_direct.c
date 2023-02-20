@@ -29,8 +29,6 @@
 #include "nr_rrc_proto.h"
 #include "nr_rrc_extern.h"
 #include "openair2/COMMON/e1ap_messages_types.h"
-//#include "UTIL/OSA/osa_defs.h"
-//#include "openair3/SECU/secu_defs.h"
 #include "openair3/SECU/key_nas_deriver.h"
 
 #include "nr_pdcp/nr_pdcp_entity.h"

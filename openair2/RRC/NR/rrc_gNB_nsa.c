@@ -41,7 +41,6 @@
 #include "executables/nr-softmodem.h"
 #include <openair2/RRC/NR/rrc_gNB_UE_context.h>
 #include <openair3/ocp-gtpu/gtp_itf.h>
-//#include "UTIL/OSA/osa_defs.h"
 #include "openair3/SECU/secu_defs.h"
 #include "openair3/SECU/key_nas_deriver.h"
 

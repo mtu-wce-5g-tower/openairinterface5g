@@ -30,7 +30,6 @@
 #include "assertions.h"
 
 #include "common/utils/LOG/log.h"
-#include "UTIL/OSA/osa_defs.h"
 
 #include "common/utils/LOG/vcd_signal_dumper.h"
 #include "executables/softmodem-common.h"

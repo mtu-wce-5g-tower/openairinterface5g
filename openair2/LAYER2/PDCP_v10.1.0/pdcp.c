@@ -52,13 +52,12 @@
 #include "common/openairinterface5g_limits.h"
 #include "executables/lte-softmodem.h"
 #include "SIMULATION/ETH_TRANSPORT/proto.h"
-#include "UTIL/OSA/osa_defs.h"
 #include "openair2/RRC/NAS/nas_config.h"
 #include "intertask_interface.h"
 #include "openair3/S1AP/s1ap_eNB.h"
 #include <pthread.h>
 
-#  include "openair3/ocp-gtpu/gtp_itf.h"
+#include "openair3/ocp-gtpu/gtp_itf.h"
 #include <openair3/ocp-gtpu/gtp_itf.h>
 
 #include "ENB_APP/enb_config.h"

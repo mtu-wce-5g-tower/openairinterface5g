@@ -69,8 +69,6 @@
   #include "rrc_UE_ral.h"
 #endif
 
-//#include "UTIL/OSA/osa_defs.h"
-//#include "openair3/SECU/secu_defs.h"
 #include "openair3/SECU/key_nas_deriver.h"
 
 #include "pdcp.h"

@@ -80,7 +80,6 @@
 #include "OCG.h"
 #include "OCG_extern.h"
 
-//#include "UTIL/OSA/osa_defs.h"
 #include "openair3/SECU/secu_defs.h"
 
 #include "rrc_eNB_S1AP.h"

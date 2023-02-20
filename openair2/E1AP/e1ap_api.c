@@ -23,14 +23,12 @@
 
 #include <arpa/inet.h>
 #include "e1ap_api.h"
-//#include "UTIL/OSA/osa_defs.h"
-//#include "openair3/SECU/secu_defs.h"
-#include "openair3/SECU/key_nas_deriver.h"
 
 #include "nr_pdcp/nr_pdcp_entity.h"
 #include "openair2/LAYER2/nr_pdcp/nr_pdcp_e1_api.h"
 #include "openair2/RRC/NR/cucp_cuup_if.h"
 #include "openair2/RRC/LTE/MESSAGES/asn1_msg.h"
+#include "openair3/SECU/key_nas_deriver.h"
 #include "openair3/ocp-gtpu/gtp_itf.h"
 #include "e1ap_asnc.h"
 #include "e1ap_common.h"

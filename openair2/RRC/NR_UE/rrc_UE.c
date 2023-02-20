@@ -58,7 +58,6 @@
 #include "executables/softmodem-common.h"
 #include "plmn_data.h"
 #include "pdcp.h"
-//#include "UTIL/OSA/osa_defs.h"
 #include "openair3/SECU/secu_defs.h"
 #include "openair3/SECU/key_nas_deriver.h"
 
