@@ -158,7 +158,7 @@ Replaces xml_files/enb_usrp210_band40_test_20mhz_tm1.xml
     <testCase id="040661">
         <class>Iperf</class>
         <desc>iperf (20MHz - UL/2Mbps/UDP)(30 sec)(balanced)</desc>
-        <iperf_args>-u -b 2M -t 30 -i 1 -R</iperf_args>
+        <iperf_args>-u -b 2M -t 30 -i 1</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <iperf_profile>balanced</iperf_profile>
         <direction>UL</direction>
@@ -168,7 +168,7 @@ Replaces xml_files/enb_usrp210_band40_test_20mhz_tm1.xml
     <testCase id="040662">
         <class>Iperf</class>
         <desc>iperf (20MHz - UL/2Mbps/UDP)(30 sec)(single-ue)</desc>
-        <iperf_args>-u -b 2M -t 30 -i 1 -R</iperf_args>
+        <iperf_args>-u -b 2M -t 30 -i 1</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <iperf_profile>single-ue</iperf_profile>
         <direction>UL</direction>
@@ -178,7 +178,7 @@ Replaces xml_files/enb_usrp210_band40_test_20mhz_tm1.xml
     <testCase id="040663">
         <class>Iperf</class>
         <desc>iperf (20MHz - UL/2Mbps/UDP)(30 sec)(unbalanced)</desc>
-        <iperf_args>-u -b 2M -t 30 -i 1 -R</iperf_args>
+        <iperf_args>-u -b 2M -t 30 -i 1</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <iperf_profile>unbalanced</iperf_profile>
         <direction>UL</direction>
@@ -188,7 +188,7 @@ Replaces xml_files/enb_usrp210_band40_test_20mhz_tm1.xml
     <testCase id="040664">
         <class>Iperf</class>
         <desc>iperf (20MHz - UL/TCP)(30 sec)(single-ue)</desc>
-        <iperf_args>-t 30 -i 1 -fm -R</iperf_args>
+        <iperf_args>-t 30 -i 1 -fm</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <iperf_profile>single-ue</iperf_profile>
         <direction>UL</direction>
@@ -198,7 +198,7 @@ Replaces xml_files/enb_usrp210_band40_test_20mhz_tm1.xml
     <testCase id="040665">
         <class>Iperf</class>
         <desc>iperf (20MHz - UL/TCP)(30 sec)</desc>
-        <iperf_args>-t 30 -i 1 -fm -R</iperf_args>
+        <iperf_args>-t 30 -i 1 -fm</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <direction>UL</direction>
         <id>adb_ue_1 adb_ue_2</id>

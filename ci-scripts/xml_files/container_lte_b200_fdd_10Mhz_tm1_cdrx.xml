@@ -115,7 +115,7 @@ Replaces xml_files/enb_usrp210_band7_test_10mhz_tm1.xml
     <testCase id="040650">
         <class>Iperf</class>
         <desc>iperf (10MHz - UL/20Mbps/UDP)(30 sec)(balanced profile)</desc>
-        <iperf_args>-u -b 20M -t 30 -i 1 -R</iperf_args>
+        <iperf_args>-u -b 20M -t 30 -i 1</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <iperf_profile>balanced</iperf_profile>
         <direction>UL</direction>

@@ -162,7 +162,7 @@ Replaces xml_files/enb_usrp210_band7_test_10mhz_tm1.xml
     <testCase id="040651">
         <class>Iperf</class>
         <desc>iperf (10MHz - UL/18Mbps/UDP)(30 sec)(balanced profile)</desc>
-        <iperf_args>-u -b 18M -t 30 -i 1 -R</iperf_args>
+        <iperf_args>-u -b 18M -t 30 -i 1</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <iperf_profile>balanced</iperf_profile>
         <direction>UL</direction>
@@ -172,7 +172,7 @@ Replaces xml_files/enb_usrp210_band7_test_10mhz_tm1.xml
     <testCase id="040652">
         <class>Iperf</class>
         <desc>iperf (10MHz - UL/18Mbps/UDP)(30 sec)(single-ue profile)</desc>
-        <iperf_args>-u -b 18M -t 30 -i 1 -R</iperf_args>
+        <iperf_args>-u -b 18M -t 30 -i 1</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <iperf_profile>single-ue</iperf_profile>
         <direction>UL</direction>
@@ -182,7 +182,7 @@ Replaces xml_files/enb_usrp210_band7_test_10mhz_tm1.xml
     <testCase id="040653">
         <class>Iperf</class>
         <desc>iperf (10MHz - UL/TCP)(30 sec)(single-ue profile)</desc>
-        <iperf_args>-t 30 -i 1 -fm -R</iperf_args>
+        <iperf_args>-t 30 -i 1 -fm</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <iperf_profile>single-ue</iperf_profile>
         <direction>UL</direction>
@@ -192,7 +192,7 @@ Replaces xml_files/enb_usrp210_band7_test_10mhz_tm1.xml
     <testCase id="040654">
         <class>Iperf</class>
         <desc>iperf (10MHz - UL/TCP)(30 sec)(balanced profile)</desc>
-        <iperf_args>-t 30 -i 1 -fm -R</iperf_args>
+        <iperf_args>-t 30 -i 1 -fm</iperf_args>
         <iperf_packetloss_threshold>50</iperf_packetloss_threshold>
         <iperf_profile>balanced</iperf_profile>
         <direction>UL</direction>
