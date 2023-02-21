@@ -33,16 +33,16 @@ import paramiko
 import uuid
 
 # helper that returns either LocalCmd or RemoteCmd based on passed host name
-def getConnection(host, d = None):
-	if host == None or host.lower() in ["", "none", "localhost"]:
-		return LocalCmd(d = d)
+def getConnection(host, d=None):
+	if host is None or host.lower() in ["", "none", "localhost"]:
+		return LocalCmd(d=d)
 	else:
-		return RemoteCmd(host, d = d)
+		return RemoteCmd(host, d=d)
 
 # provides a partial interface for the legacy SSHconnection class (getBefore(), command())
 class Cmd(metaclass=abc.ABCMeta):
 	def cd(self, d, silent=False):
-		if d == None or d == '' or d == []:
+		if d == None or d == '':
 			self.cwd = None
 		elif d[0] == '/':
 			self.cwd = d
@@ -58,9 +58,13 @@ class Cmd(metaclass=abc.ABCMeta):
 	def run(self, line, timeout=300, silent=False):
 		return
 
-	@abc.abstractmethod
-	def command(self, commandline, expectedline, timeout, silent=False, resync=False):
-		return
+	def command(self, commandline, expectedline=None, timeout=300, silent=False, resync=False):
+		splitted = commandline.split(' ')
+		if splitted[0] == 'cd':
+			self.cd(' '.join(splitted[1:]), silent)
+		else:
+			self.run(commandline, timeout, silent)
+		return 0
 
 	@abc.abstractmethod
 	def close(self):
@@ -104,13 +108,6 @@ class LocalCmd(Cmd):
 			logging.warning(f'command "{ret.args}" returned non-zero returncode {ret.returncode}: output:\n{ret.stdout}')
 		self.cp = ret
 		return ret
-
-	def command(self, commandline, expectedline=None, timeout=300, silent=False, resync=False):
-		if commandline.split()[0] == 'cd':
-			self.cd(line[1], silent)
-		else:
-			self.run(commandline, timeout, silent)
-		return 0
 
 	def close(self):
 		pass
@@ -175,13 +172,6 @@ class RemoteCmd(Cmd):
 			logging.warning(f'command "{line}" returned non-zero returncode {ret.returncode}: output:\n{ret.stdout}')
 		self.cp = ret
 		return ret
-
-	def command(self, commandline, expectedline=None, timeout=300, silent=False, resync=False):
-		if commandline.split()[0] == 'cd':
-			self.cd(line[1], silent)
-		else:
-			self.run(commandline, timeout, silent)
-		return 0
 
 	def close(self):
 		self.client.close()
