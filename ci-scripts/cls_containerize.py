@@ -1118,7 +1118,7 @@ class Containerize():
 			cmd = 'docker inspect -f "{{.Config.Image}}" ' + newCont
 			imageInspect = myCmd.run(cmd, timeout=30, silent=True)
 			imageName = str(imageInspect.stdout).strip()
-			cmd = 'docker image inspect --format \'{{.RepoTags}}\t{{.Size}} bytes\t{{index (split .Created ".") 0}}\n{{.Id}}\'' + imageName
+			cmd = 'docker image inspect --format \'{{.RepoTags}}\t{{.Size}} bytes\t{{index (split .Created ".") 0}}\n{{.Id}}\' ' + imageName
 			imageInspect = myCmd.run(cmd, 30, silent=True)
 			html_cell += imageInspect.stdout
 		myCmd.close()
