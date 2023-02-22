@@ -150,11 +150,11 @@ int test_ldpc(short max_iterations,
 
   // generate input block
   for(int j=0;j<MAX_NUM_DLSCH_SEGMENTS;j++) {
-    test_input[j]=(uint8_t *)malloc16(sizeof(uint8_t) * block_length/8);
+    test_input[j]=malloc16(sizeof(uint8_t) * block_length/8);
     memset(test_input[j], 0, sizeof(uint8_t) * block_length / 8);
-    channel_input[j] = (uint8_t *)malloc16(sizeof(uint8_t) * 68*384);
+    channel_input[j] = malloc16(sizeof(uint8_t) * 68*384);
     memset(channel_input[j], 0, sizeof(uint8_t) * 68 * 384);
-    channel_input_optim[j] = (uint8_t *)malloc16(sizeof(uint8_t) * 68*384);
+    channel_input_optim[j] = malloc16(sizeof(uint8_t) * 68*384);
     memset(channel_input_optim[j], 0, sizeof(uint8_t) * 68 * 384);
   }
 
@@ -434,7 +434,7 @@ int main(int argc, char *argv[])
   unsigned int errors, errors_bit, crc_misses;
   double errors_bit_uncoded;
   short block_length=8448; // decoder supports length: 1201 -> 1280, 2401 -> 2560
-  int8_t *ldpc_version=NULL; /* version of the ldpc decoder library to use (XXX suffix to use when loading libldpc_XXX.so */
+  char *ldpc_version=NULL; /* version of the ldpc decoder library to use (XXX suffix to use when loading libldpc_XXX.so */
   short max_iterations=5;
   int n_segments=1;
   //double rate=0.333;
