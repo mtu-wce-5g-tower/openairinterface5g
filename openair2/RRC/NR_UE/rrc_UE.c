@@ -1345,7 +1345,13 @@ static void rrc_ue_generate_RRCSetupComplete(
    ctxt_pP->module_id,ctxt_pP->frame, size, gNB_index);
   LOG_D(NR_RRC,
        "[FRAME %05d][RRC_UE][MOD %02d][][--- PDCP_DATA_REQ/%d Bytes (RRCSetupComplete to gNB %d MUI %d) --->][PDCP][MOD %02d][RB %02d]\n",
-       ctxt_pP->frame, ctxt_pP->module_id+NB_RN_INST, size, gNB_index, nr_rrc_mui, ctxt_pP->module_id+NB_eNB_INST, DCCH);
+        ctxt_pP->frame,
+        ctxt_pP->module_id,
+        size,
+        gNB_index,
+        nr_rrc_mui,
+        ctxt_pP->module_id + NB_eNB_INST,
+        DCCH);
 
   //for (int i=0;i<size;i++) printf("%02x ",buffer[i]);
   //printf("\n");
@@ -1968,7 +1974,6 @@ nr_rrc_ue_establish_srb2(
                                   radioBearerConfig->srb_ToAddModList,
                                   NULL,
                                   NULL,
-                                  NULL,
                                   NR_UE_rrc_inst[ctxt_pP->module_id].cell_group_config->rlc_BearerToAddModList
                                   );
 
@@ -2063,7 +2068,7 @@ nr_rrc_ue_establish_srb2(
                       kUPint,
                       NR_UE_rrc_inst[ctxt_pP->module_id].cell_group_config->rlc_BearerToAddModList);
      // Refresh DRBs
-     nr_rrc_rlc_config_asn1_req(ctxt_pP, NULL, radioBearerConfig->drb_ToAddModList, NULL, NULL, NR_UE_rrc_inst[ctxt_pP->module_id].cell_group_config->rlc_BearerToAddModList);
+     nr_rrc_rlc_config_asn1_req(ctxt_pP, NULL, radioBearerConfig->drb_ToAddModList, NULL, NR_UE_rrc_inst[ctxt_pP->module_id].cell_group_config->rlc_BearerToAddModList);
    } // drb_ToAddModList //
 
    if (radioBearerConfig->drb_ToReleaseList != NULL) {

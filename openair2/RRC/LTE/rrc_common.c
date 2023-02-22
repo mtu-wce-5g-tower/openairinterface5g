@@ -42,6 +42,7 @@
 #include "common/utils/LOG/vcd_signal_dumper.h"
 #include "rrc_eNB_UE_context.h"
 #include "common/ran_context.h"
+#include "openair2/RRC/LTE/rrc_proto.h"
 
 extern RAN_CONTEXT_t RC;
 extern UE_MAC_INST *UE_mac_inst;
@@ -65,18 +66,6 @@ rrc_init_global_param(
   DTCH_UL_LCHAN_DESC.transport_block_size = 52;
   DTCH_UL_LCHAN_DESC.max_transport_blocks = 20;
   DTCH_UL_LCHAN_DESC.Delay_class = 1;
-  Rlc_info_um.rlc_mode = RLC_MODE_UM;
-  Rlc_info_um.rlc.rlc_um_info.timer_reordering = 5;
-  Rlc_info_um.rlc.rlc_um_info.sn_field_length = 10;
-  Rlc_info_um.rlc.rlc_um_info.is_mXch = 0;
-  //Rlc_info_um.rlc.rlc_um_info.sdu_discard_mode=16;
-  Rlc_info_am_config.rlc_mode = RLC_MODE_AM;
-  Rlc_info_am_config.rlc.rlc_am_info.max_retx_threshold = 50;
-  Rlc_info_am_config.rlc.rlc_am_info.poll_pdu = 8;
-  Rlc_info_am_config.rlc.rlc_am_info.poll_byte = 1000;
-  Rlc_info_am_config.rlc.rlc_am_info.t_poll_retransmit = 15;
-  Rlc_info_am_config.rlc.rlc_am_info.t_reordering = 50;
-  Rlc_info_am_config.rlc.rlc_am_info.t_status_prohibit = 10;
   return 0;
 }
 
@@ -95,12 +84,7 @@ rrc_config_buffer(
 
 
 //-----------------------------------------------------------------------------
-long
-binary_search_int(
-  int elements[],
-  long numElem,
-  int value
-)
+long binary_search_int(const int elements[], long numElem, int value)
 //-----------------------------------------------------------------------------
 {
   long first, last, middle, search = -1;
@@ -141,12 +125,7 @@ binary_search_int(
    Used for RSRP and RSRQ measurement mapping. Can potentially be used for other things
 */
 //-----------------------------------------------------------------------------
-long
-binary_search_float(
-  float elements[],
-  long numElem,
-  float value
-)
+long binary_search_float(const float elements[], long numElem, float value)
 //-----------------------------------------------------------------------------
 {
   long first, last, middle;

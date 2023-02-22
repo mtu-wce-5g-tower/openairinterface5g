@@ -59,7 +59,7 @@ uint64_t downlink_frequency[MAX_NUM_CCs][4];
 
 double cpuf;
 //uint8_t nfapi_mode = 0;
-uint16_t NB_UE_INST = 1;
+const int NB_UE_INST = 1;
 uint8_t const nr_rv_round_map[4] = {0, 2, 3, 1};
 const short conjugate[8]__attribute__((aligned(16))) = {-1,1,-1,1,-1,1,-1,1};
 const short conjugate2[8]__attribute__((aligned(16))) = {1,-1,1,-1,1,-1,1,-1};
@@ -404,6 +404,8 @@ int main(int argc, char **argv)
   cfg->carrier_config.num_tx_ant.value = n_tx;
   cfg->carrier_config.num_rx_ant.value = n_rx;
   nr_phy_config_request_sim(gNB,N_RB_DL,N_RB_DL,mu,Nid_cell,SSB_positions);
+  gNB->gNB_config.tdd_table.tdd_period.value = 6;
+  set_tdd_config_nr(&gNB->gNB_config, mu, 7, 6, 2, 4);
   phy_init_nr_gNB(gNB);
   /* RU handles rxdataF, and gNB just has a pointer. Here, we don't have an RU,
    * so we need to allocate that memory as well. */
@@ -720,6 +722,11 @@ int main(int argc, char **argv)
   }
   free_channel_desc_scm(UE2gNB);
   term_freq_channel();
+
+  int nb_slots_to_set = TDD_CONFIG_NB_FRAMES * (1 << mu) * NR_NUMBER_OF_SUBFRAMES_PER_FRAME;
+  for (int i = 0; i < nb_slots_to_set; ++i)
+    free(gNB->gNB_config.tdd_table.max_tdd_periodicity_list[i].max_num_of_symbol_per_slot_list);
+  free(gNB->gNB_config.tdd_table.max_tdd_periodicity_list);
 
   for (i = 0; i < n_rx; i++)
     free(gNB->common_vars.rxdataF[i]);

@@ -28,6 +28,7 @@
 #include "common/ran_context.h"
 #include "common/config/config_userapi.h"
 #include "common/utils/nr/nr_common.h"
+#include "common/utils/var_array.h"
 #include "common/utils/LOG/log.h"
 #include "LAYER2/NR_MAC_gNB/nr_mac_gNB.h"
 #include "LAYER2/NR_MAC_UE/mac_defs.h"
@@ -68,7 +69,6 @@
 #include "SIMULATION/LTE_PHY/common_sim.h"
 #include "PHY/NR_REFSIG/dmrs_nr.h"
 
-#include <openair2/LAYER2/MAC/mac_vars.h>
 #include <openair2/RRC/LTE/rrc_vars.h>
 
 #include <executables/softmodem-common.h>
@@ -80,9 +80,6 @@ const char *__asan_default_options()
   /* don't do leak checking in nr_ulsim, not finished yet */
   return "detect_leaks=0";
 }
-
-LCHAN_DESC DCCH_LCHAN_DESC,DTCH_DL_LCHAN_DESC,DTCH_UL_LCHAN_DESC;
-rlc_info_t Rlc_info_um,Rlc_info_am_config;
 
 PHY_VARS_gNB *gNB;
 PHY_VARS_NR_UE *UE;
@@ -101,22 +98,6 @@ nfapi_ue_release_request_body_t release_rntis;
 //Fixme: Uniq dirty DU instance, by global var, datamodel need better management
 instance_t DUuniqInstance=0;
 instance_t CUuniqInstance=0;
-teid_t newGtpuCreateTunnel(instance_t instance,
-                           ue_id_t ue_id,
-                           int incoming_bearer_id,
-                           int outgoing_bearer_id,
-                           teid_t outgoing_teid,
-                           int qfi,
-                           transport_layer_addr_t remoteAddr,
-                           int port,
-                           gtpCallback callBack,
-                           gtpCallbackSDAP callBackSDAP) {
-  return 0;
-}
-
-int newGtpuDeleteAllTunnels(instance_t instance, ue_id_t ue_id) {
-  return 0;
-}
 
 // dummy functions
 int dummy_nr_ue_ul_indication(nr_uplink_indication_t *ul_info)              { return(0);  }
@@ -157,59 +138,6 @@ rrc_data_ind(
   const uint8_t   *const       buffer_pP
 )
 {
-}
-
-int
-gtpv1u_create_s1u_tunnel(
-  const instance_t                              instanceP,
-  const gtpv1u_enb_create_tunnel_req_t *const  create_tunnel_req_pP,
-  gtpv1u_enb_create_tunnel_resp_t *const create_tunnel_resp_pP
-) {
-  return 0;
-}
-
-int
-rrc_gNB_process_GTPV1U_CREATE_TUNNEL_RESP(
-  const protocol_ctxt_t *const ctxt_pP,
-  const gtpv1u_enb_create_tunnel_resp_t *const create_tunnel_resp_pP,
-  uint8_t                         *inde_list
-) {
-  return 0;
-}
-
-int
-gtpv1u_create_ngu_tunnel(
-  const instance_t instanceP,
-  const gtpv1u_gnb_create_tunnel_req_t *  const create_tunnel_req_pP,
-        gtpv1u_gnb_create_tunnel_resp_t * const create_tunnel_resp_pP){
-  return 0;
-}
-
-int
-gtpv1u_update_ngu_tunnel(
-  const instance_t                              instanceP,
-  const gtpv1u_gnb_create_tunnel_req_t *const  create_tunnel_req_pP,
-  const ue_id_t                                 prior_ue_id
-){
-  return 0;
-}
-
-int gtpv1u_delete_s1u_tunnel(const instance_t instance, const gtpv1u_enb_delete_tunnel_req_t *const req_pP) {
-  return 0;
-}
-
-int gtpv1u_delete_ngu_tunnel( const instance_t instance,
-			      gtpv1u_gnb_delete_tunnel_req_t *req) {
-  return 0;
-}
-
-int
-nr_rrc_gNB_process_GTPV1U_CREATE_TUNNEL_RESP(
-  const protocol_ctxt_t *const ctxt_pP,
-  const gtpv1u_gnb_create_tunnel_resp_t *const create_tunnel_resp_pP,
-  uint8_t                         *inde_list
-){
-  return 0;
 }
 
 int nr_derive_key(int alg_type, uint8_t alg_id,
@@ -372,6 +300,7 @@ nrUE_params_t *get_nrUE_params(void) {
 
 void do_nothing(void *args) {
 }
+int NB_UE_INST = 1;
 
 int main(int argc, char **argv)
 {
@@ -414,7 +343,6 @@ int main(int argc, char **argv)
 
   SCM_t channel_model = AWGN; // AWGN Rayleigh1 Rayleigh1_anticorr;
 
-  NB_UE_INST = 1;
   //double pbch_sinr;
   //int pbch_tx_ant;
   int N_RB_DL=106,mu=1;
@@ -461,7 +389,8 @@ int main(int argc, char **argv)
 
   FILE *scg_fd=NULL;
 
-  while ((c = getopt(argc, argv, "f:hA:pf:g:i:n:s:S:t:v:x:y:z:M:N:F:GR:d:PI:L:a:b:e:m:w:T:U:q:X:Y")) != -1) {
+  while ((c = getopt(argc, argv, "f:hA:pf:g:i:n:s:S:t:v:x:y:z:M:N:F:GR:d:PI:L:Ea:b:e:m:w:T:U:q:X:Y")) != -1) {
+    printf("option %c\n",c);
     switch (c) {
     case 'f':
       scg_fd = fopen(optarg,"r");
@@ -1043,12 +972,13 @@ int main(int argc, char **argv)
   memset(msgDataTx->ssb, 0, 64*sizeof(NR_gNB_SSB_t));
 
   // Buffers to store internal memory of slot process
-  UE->phy_sim_rxdataF = calloc(frame_parms->samples_per_slot_wCP*sizeof(int32_t), frame_parms->nb_antennas_rx);
-  UE->phy_sim_pdsch_llr = calloc((8*(3*8*8448))*sizeof(int16_t), 1); //Max length
-  UE->phy_sim_pdsch_rxdataF_ext = calloc(14*frame_parms->N_RB_DL*12*sizeof(int32_t), frame_parms->nb_antennas_rx);
-  UE->phy_sim_pdsch_rxdataF_comp = calloc(14*frame_parms->N_RB_DL*12*sizeof(int32_t), frame_parms->nb_antennas_rx);
-  UE->phy_sim_pdsch_dl_ch_estimates = calloc(14*frame_parms->ofdm_symbol_size*sizeof(int32_t), frame_parms->nb_antennas_rx);
-  UE->phy_sim_pdsch_dl_ch_estimates_ext = calloc(14*frame_parms->N_RB_DL*12*sizeof(int32_t), frame_parms->nb_antennas_rx);
+  int rx_size = (((14 * frame_parms->N_RB_DL * 12 * sizeof(int32_t)) + 15) >> 4) << 4;
+  UE->phy_sim_rxdataF = calloc(sizeof(int32_t *) * frame_parms->nb_antennas_rx * g_nrOfLayers, frame_parms->samples_per_slot_wCP * sizeof(int32_t));
+  UE->phy_sim_pdsch_llr = calloc(1, (8 * (3 * 8 * 8448)) * sizeof(int16_t)); // Max length
+  UE->phy_sim_pdsch_rxdataF_ext = calloc(sizeof(int32_t *) * frame_parms->nb_antennas_rx * g_nrOfLayers, rx_size);
+  UE->phy_sim_pdsch_rxdataF_comp = calloc(sizeof(int32_t *) * frame_parms->nb_antennas_rx * g_nrOfLayers, rx_size);
+  UE->phy_sim_pdsch_dl_ch_estimates = calloc(sizeof(int32_t *) * frame_parms->nb_antennas_rx * g_nrOfLayers, rx_size);
+  UE->phy_sim_pdsch_dl_ch_estimates_ext = calloc(sizeof(int32_t *) * frame_parms->nb_antennas_rx * g_nrOfLayers, rx_size);
 
   for (SNR = snr0; SNR < snr1; SNR += .2) {
 

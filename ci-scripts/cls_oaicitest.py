@@ -193,6 +193,7 @@ class OaiCiTest():
 		self.expectedNbOfConnectedUEs = 0
 		self.ue_id = '' #used for module identification
 		self.ue_trace ='' #used to enable QLog trace for Module UE, passed to Module UE object at InitializeUE()
+		self.cmd_prefix = '' # prefix before {lte,nr}-uesoftmodem
 
 
 	def BuildOAIUE(self,HTML):
@@ -489,7 +490,7 @@ class OaiCiTest():
 			copyin_res = SSH.copyin(RAN.eNBIPAddress, RAN.eNBUserName, RAN.eNBPassword, RAN.eNBSourceCodePath + '/cmake_targets/reconfig.raw', '.')
 			if (copyin_res == 0):
 				SSH.copyout(self.UEIPAddress, self.UEUserName, self.UEPassword, './reconfig.raw', self.UESourceCodePath + '/cmake_targets/ran_build/build')
-		SSH.command('echo "ulimit -c unlimited && ./'+ self.air_interface +' ' + self.Initialize_OAI_UE_args + '" > ./my-lte-uesoftmodem-run' + str(self.UE_instance) + '.sh', '\$', 5)
+		SSH.command(f'echo "ulimit -c unlimited && {self.cmd_prefix} ./{self.air_interface} {self.Initialize_OAI_UE_args}" > ./my-lte-uesoftmodem-run{self.UE_instance}.sh', '\$', 5)
 		SSH.command('chmod 775 ./my-lte-uesoftmodem-run' + str(self.UE_instance) + '.sh', '\$', 5)
 		SSH.command('echo ' + self.UEPassword + ' | sudo -S rm -Rf ' + self.UESourceCodePath + '/cmake_targets/ue_' + self.testCase_id + '.log', '\$', 5)
 		self.UELogFile = 'ue_' + self.testCase_id + '.log'
@@ -3178,7 +3179,7 @@ class OaiCiTest():
 				result = re.search('warning: discard PDU, sn out of window', str(line))
 				if result is not None:
 					nbPduDiscard += 1
-				result = re.search('--nfapi 5 --node-number 2 --sa', str(line))
+				result = re.search('--nfapi STANDALONE_PNF --node-number 2 --sa', str(line))
 				if result is not None:
 					frequency_found = True
 			result = re.search('Exiting OAI softmodem', str(line))

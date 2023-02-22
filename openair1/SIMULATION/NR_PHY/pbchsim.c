@@ -60,7 +60,7 @@ int32_t uplink_frequency_offset[MAX_NUM_CCs][4];
 
 double cpuf;
 //uint8_t nfapi_mode = 0;
-uint16_t NB_UE_INST = 1;
+const int NB_UE_INST = 1;
 
 // needed for some functions
 openair0_config_t openair0_cfg[MAX_CARDS];
@@ -471,6 +471,8 @@ int main(int argc, char **argv)
   frame_parms->freq_range = mu<2 ? nr_FR1 : nr_FR2;
 
   nr_phy_config_request_sim_pbchsim(gNB,N_RB_DL,N_RB_DL,mu,Nid_cell,SSB_positions);
+  gNB->gNB_config.tdd_table.tdd_period.value = 6;
+  set_tdd_config_nr(&gNB->gNB_config, mu, 7, 6, 2, 4);
   phy_init_nr_gNB(gNB);
   frame_parms->ssb_start_subcarrier = 12 * gNB->gNB_config.ssb_table.ssb_offset_point_a.value + ssb_subcarrier_offset;
 
@@ -751,11 +753,12 @@ int main(int argc, char **argv)
 
 	UE->rx_offset=0;
 	uint8_t ssb_index = 0;
-	const int estimateSz=7*2*sizeof(int)*frame_parms->ofdm_symbol_size;
-	__attribute__ ((aligned(32))) struct complex16 dl_ch_estimates[frame_parms->nb_antennas_rx][estimateSz];
-	__attribute__ ((aligned(32))) struct complex16 dl_ch_estimates_time[frame_parms->nb_antennas_rx][estimateSz];
-        while (!((SSB_positions >> ssb_index) & 0x01)) ssb_index++;  // to select the first transmitted ssb
-	UE->symbol_offset = nr_get_ssb_start_symbol(frame_parms,ssb_index);
+  const int estimateSz = frame_parms->symbols_per_slot * frame_parms->ofdm_symbol_size;
+  __attribute__((aligned(32))) struct complex16 dl_ch_estimates[frame_parms->nb_antennas_rx][estimateSz];
+  __attribute__((aligned(32))) struct complex16 dl_ch_estimates_time[frame_parms->nb_antennas_rx][frame_parms->ofdm_symbol_size];
+  while (!((SSB_positions >> ssb_index) & 0x01))
+    ssb_index++; // to select the first transmitted ssb
+  UE->symbol_offset = nr_get_ssb_start_symbol(frame_parms, ssb_index);
 
         int ssb_slot = (UE->symbol_offset/14)+(n_hf*(frame_parms->slots_per_frame>>1));
         proc.nr_slot_rx = ssb_slot;
@@ -815,6 +818,11 @@ int main(int argc, char **argv)
   } // NSR
 
   free_channel_desc_scm(gNB2UE);
+
+  int nb_slots_to_set = TDD_CONFIG_NB_FRAMES * (1 << mu) * NR_NUMBER_OF_SUBFRAMES_PER_FRAME;
+  for (int i = 0; i < nb_slots_to_set; ++i)
+    free(gNB->gNB_config.tdd_table.max_tdd_periodicity_list[i].max_num_of_symbol_per_slot_list);
+  free(gNB->gNB_config.tdd_table.max_tdd_periodicity_list);
 
   phy_free_nr_gNB(gNB);
   free(RC.gNB[0]);
