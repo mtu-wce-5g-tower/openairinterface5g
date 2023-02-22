@@ -32,7 +32,7 @@ services:
         entrypoint: /bin/bash -c "cqlsh --file /home/oai_db.cql 192.168.68.2 && echo 'OK'"
 
     oai_hss:
-        image: oai-hss:latest
+        image: oai-hss:develop
         container_name: rfsim4g-oai-hss
         privileged: true
         depends_on: [cassandra]
@@ -104,7 +104,7 @@ services:
             retries: 5
 
     oai_spgwc:
-        image: oai-spgwc:latest
+        image: oai-spgwc:develop
         privileged: true
         depends_on: [magma_mme]
         container_name: rfsim4g-oai-spgwc
@@ -136,7 +136,7 @@ services:
             retries: 5
 
     oai_spgwu:
-        image: oai-spgwu-tiny:latest
+        image: oai-spgwu-tiny:develop
         privileged: true
         container_name: rfsim4g-oai-spgwu-tiny
         depends_on: [oai_spgwc]
@@ -166,7 +166,7 @@ services:
             retries: 5
 
     trf_gen:
-        image: trf-gen:production
+        image: trf-gen:latest
         privileged: true
         container_name: rfsim4g-trf-gen
         networks:
@@ -209,16 +209,12 @@ services:
             - "10000"
         environment:
             TZ: Europe/Paris
-            HOSTNAME: oai_ue0
             RFSIMULATOR: 192.168.61.20
-            MCC: '208'
-            MNC: '96'
-            SHORT_IMSI: '0100000001'
-            LTE_KEY: 'fec86ba6eb707ed08905757b1bb44b8f'
-            OPC: 'c42449363bbad02b66d16bc975d77cc1'
-            MSISDN: '001011234561010'
-            HPLMN: 20896
+            USE_VOLUMED_CONF: 'yes'
             USE_ADDITIONAL_OPTIONS: --rfsim -C 2680000000 -r 100 --ue-rxgain 140 --ue-txgain 120 --nokrnmod 1 --log_config.global_log_options level,nocolor,time
+        volumes:
+          - ./ue_4g_rfsim_fdd_20mhz.conf:/opt/oai-lte-ue/etc/mounted.conf
+          - ../../conf_files/ue_sim_ci.conf:/opt/oai-lte-ue/etc/ue_usim.conf
         healthcheck:
             test: /bin/bash -c "pgrep lte-uesoftmodem"
             interval: 10s
