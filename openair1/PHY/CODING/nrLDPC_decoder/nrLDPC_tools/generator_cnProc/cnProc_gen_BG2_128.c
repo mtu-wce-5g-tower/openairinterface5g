@@ -79,7 +79,7 @@ void nrLDPC_cnProc_BG2_generator_128(const char* dir, int R)
   fprintf(fd,"                simde__m128i ymm0, min, sgn,ones,maxLLR;\n");
   fprintf(fd,"                ones   = simde_mm_set1_epi8((char)1);\n");
   fprintf(fd,"                maxLLR = simde_mm_set1_epi8((char)127);\n");
-    fprintf(fd,"                uint32_t M;\n");
+  fprintf(fd,"                uint32_t M;\n");
  
 
   if (lut_numCnInCnGroups[0] > 0)
@@ -96,7 +96,7 @@ void nrLDPC_cnProc_BG2_generator_128(const char* dir, int R)
       for (j=0; j<3; j++)
         {
 
-            fprintf(fd,"            for (int i=0;i<M;i+=2) {\n");
+            fprintf(fd,"            for (int i=0;i<M;i++) {\n");
             // Abs and sign of 16 CNs (first BN)
             //                ymm0 = p_cnProcBuf[lut_idxCnProcG3[j][0] + i];
             fprintf(fd,"                ymm0 = ((simde__m128i*)cnProcBuf)[%d+i];\n",(lut_startAddrCnGroups[0]>>4)+lut_idxCnProcG3[j][0]*2);
