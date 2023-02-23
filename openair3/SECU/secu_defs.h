@@ -71,7 +71,4 @@ typedef enum{
 
 void stream_compute_encrypt(eea_alg_id_e alg, nas_stream_cipher_t *stream_cipher, uint8_t *out);
 
-
-#undef SECU_DEBUG
-
 #endif /* SECU_DEFS_H_ */

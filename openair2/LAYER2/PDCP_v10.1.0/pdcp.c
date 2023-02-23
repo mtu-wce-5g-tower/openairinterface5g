@@ -2108,19 +2108,6 @@ pdcp_config_req_asn1(const protocol_ctxt_t *const  ctxt_pP,
         // pdcp_remove_UE(ctxt_pP);
       }
 
-      /* Security keys */
-      if (pdcp_pP->kUPenc != NULL) {
-        free(pdcp_pP->kUPenc);
-      }
-
-      if (pdcp_pP->kRRCint != NULL) {
-        free(pdcp_pP->kRRCint);
-      }
-
-      if (pdcp_pP->kRRCenc != NULL) {
-        free(pdcp_pP->kRRCenc);
-      }
-
       memset(pdcp_pP, 0, sizeof(pdcp_t));
       break;
 
@@ -2410,18 +2397,6 @@ pdcp_free (
   pdcp_t *pdcp_p = (pdcp_t *)pdcp_pP;
 
   if (pdcp_p != NULL) {
-    if (pdcp_p->kUPenc != NULL) {
-      free(pdcp_p->kUPenc);
-    }
-
-    if (pdcp_p->kRRCint != NULL) {
-      free(pdcp_p->kRRCint);
-    }
-
-    if (pdcp_p->kRRCenc != NULL) {
-      free(pdcp_p->kRRCenc);
-    }
-
     memset(pdcp_pP, 0, sizeof(pdcp_t));
     free(pdcp_pP);
   }
