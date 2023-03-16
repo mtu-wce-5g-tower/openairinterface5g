@@ -1120,7 +1120,9 @@ int device_init(openair0_device *device,
             (status=bladerf_calibrate_dc(brf->dev, BLADERF_DC_CAL_RX_LPF)) != 0 ||
             (status=bladerf_calibrate_dc(brf->dev, BLADERF_DC_CAL_RXVGA2)) != 0) {
         fprintf(stderr, "[BRF] error calibrating\n");
+#if 0
         brf_error(status);
+#endif
     } else
         printf("[BRF] calibration OK\n");
 
