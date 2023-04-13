@@ -962,6 +962,14 @@ int device_init(openair0_device *device,
 
     // init required params
     switch ((int)openair0_cfg->sample_rate) {
+    case 61440000:
+        openair0_cfg->samples_per_packet    = 2048;
+        openair0_cfg->tx_sample_advance     = 0;
+        break;
+    case 46080000:
+        openair0_cfg->samples_per_packet    = 2048;
+        openair0_cfg->tx_sample_advance     = 0;
+        break;
     case 30720000:
         openair0_cfg->samples_per_packet    = 2048;
         openair0_cfg->tx_sample_advance     = 0;
